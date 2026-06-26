@@ -197,6 +197,17 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
 @media(max-width:380px){.content{padding:12px 10px;}.onb-inner{padding:22px 16px;}}
 
+
+/* Calculadora metabólica */
+.calc-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.calc-row:last-child{border-bottom:none;}
+.calc-lbl{color:var(--t2);}
+.calc-val{font-weight:700;font-size:14px;}
+.calc-macro-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0;}
+.calc-macro{background:var(--bg3);border-radius:8px;padding:10px 6px;text-align:center;}
+.calc-macro-v{font-size:18px;font-weight:800;line-height:1;margin-bottom:2px;}
+.calc-macro-l{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:0.06em;}
+.velocidad-tag{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;margin:8px 0;}
 /* Restricciones toggle buttons */
 .rest-btn{display:block;width:100%;text-align:left;padding:10px 12px;border-radius:8px;border:2px solid var(--border2);background:var(--bg3);color:var(--t2);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;-webkit-tap-highlight-color:transparent;}
 .rest-btn:active{opacity:0.7;}
@@ -268,10 +279,25 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     </div>
     <div class="fg"><label>Objetivo principal</label>
       <select id="ob-obj">
-        <option value="recomp">Recomposición (músculo + quemar grasa)</option>
-        <option value="perdida">Pérdida de grasa prioritaria</option>
+        <option value="recomp">Recomposición corporal (músculo + quemar grasa)</option>
+        <option value="perdida">Pérdida de grasa / Déficit calórico</option>
         <option value="volumen">Ganancia muscular</option>
         <option value="mant">Mantenimiento</option>
+      </select>
+    </div>
+    <div class="fg" id="fg-deficit" style="display:none;">
+      <label>Déficit calórico</label>
+      <select id="ob-deficit">
+        <option value="15">15% — Suave (preserva más músculo, ideal principiantes)</option>
+        <option value="20" selected>20% — Moderado (recomendado, ~0.5 kg/semana)</option>
+        <option value="25">25% — Agresivo (máx. recomendado por endocrinólogos)</option>
+      </select>
+    </div>
+    <div class="fg"><label>Tipo de alimentación</label>
+      <select id="ob-dieta">
+        <option value="equilibrada" selected>Equilibrada (carbs moderados)</option>
+        <option value="lowcarb">Baja en carbohidratos (low-carb)</option>
+        <option value="keto">Cetogénica (keto, &lt;50g carbs/día)</option>
       </select>
     </div>
     <div class="fg"><label>Actividad semanal</label>
@@ -450,11 +476,56 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <div class="section-title">Mi perfil</div>
   <div class="section-sub">Datos, suplementos y configuración</div>
   <div class="card" id="perfil-card"></div>
+
+  <!-- CALCULADORA METABÓLICA -->
+  <div class="card" style="border-color:var(--amber);">
+    <div class="card-hdr"><div class="card-title" style="color:var(--amber);">🔬 Calculadora metabólica</div></div>
+    <div id="calc-metabolica"></div>
+  </div>
+
+  <!-- EDITAR OBJETIVO -->
+  <div class="card" style="border-color:var(--acc);">
+    <div class="card-hdr"><div class="card-title" style="color:var(--acc2);">⚙️ Modificar objetivo y plan</div></div>
+    <div class="fg"><label>Objetivo</label>
+      <select id="edit-obj">
+        <option value="recomp">Recomposición corporal</option>
+        <option value="perdida">Pérdida de grasa / Déficit calórico</option>
+        <option value="volumen">Ganancia muscular</option>
+        <option value="mant">Mantenimiento</option>
+      </select>
+    </div>
+    <div class="fg" id="edit-fg-deficit">
+      <label>Déficit calórico</label>
+      <select id="edit-deficit">
+        <option value="15">15% — Suave (preserva músculo)</option>
+        <option value="20" selected>20% — Moderado (recomendado)</option>
+        <option value="25">25% — Agresivo (máximo recomendado)</option>
+      </select>
+    </div>
+    <div class="fg"><label>Tipo de alimentación</label>
+      <select id="edit-dieta">
+        <option value="equilibrada">Equilibrada</option>
+        <option value="lowcarb">Baja en carbohidratos</option>
+        <option value="keto">Cetogénica (keto)</option>
+      </select>
+    </div>
+    <div class="fg"><label>Peso actual (kg)</label>
+      <input type="number" id="edit-peso" step="0.1" inputmode="decimal" placeholder="Ej: 95.5">
+    </div>
+    <button class="btn btn-acc btn-full" id="btn-edit-save">Actualizar plan ✓</button>
+  </div>
+
   <div class="card"><div class="card-title" style="margin-bottom:10px;">💊 Suplementación</div><div id="perfil-supls"></div></div>
   <div class="card">
     <div class="card-title" style="margin-bottom:10px;">⚙️ Configuración</div>
-    <div class="fg"><label>API Key Anthropic (IA análisis)</label><input type="password" id="cfg-key" placeholder="sk-ant-..."></div>
-    <button class="btn btn-green btn-full" id="btn-save-cfg" style="margin-bottom:8px;">Guardar config</button>
+    <div style="font-size:12px;color:var(--green);background:var(--gb);border-radius:8px;padding:9px 12px;margin-bottom:10px;line-height:1.6;">
+      <b>🆓 IA Gratuita:</b> Usa Gemini de Google (sin pago). Obtén tu clave gratis en <b>aistudio.google.com</b> (inicia sesión con Google → Get API key → Create API Key).
+    </div>
+    <div class="fg"><label>API Key Gemini (Google · GRATIS)</label><input type="password" id="cfg-gemini" placeholder="AIza..."></div>
+    <div style="font-size:11px;color:var(--t3);margin-top:-6px;margin-bottom:10px;">aistudio.google.com → Get API Key → Create API Key</div>
+    <div class="sep" style="margin:8px 0;"></div>
+    <div class="fg"><label>API Key Anthropic (opcional, más potente)</label><input type="password" id="cfg-key" placeholder="sk-ant-..."></div>
+    <button class="btn btn-green btn-full" id="btn-save-cfg" style="margin-bottom:8px;">Guardar configuración</button>
     <button class="btn btn-d btn-full" id="btn-logout">Cerrar sesión</button>
   </div>
 </div>
@@ -542,6 +613,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 var STORE_KEY='specimen_v3';
 var APP={users:[],cur:0,timerSecs:120,timerMax:120,timerRun:false,timerInt:null,exTemp:[]};
 var ANTHROPIC_KEY=localStorage.getItem('specimen_apikey')||'';
+var GEMINI_KEY=localStorage.getItem('specimen_gemini')||'';
 
 // ── helpers ──────────────────────────────────
 var $=function(id){return document.getElementById(id);};
@@ -557,16 +629,99 @@ function loadAll(){var r=localStorage.getItem(STORE_KEY);if(r)try{var d=JSON.par
 
 // ── calcMacros Harris-Benedict ────────────────
 function calcMacros(u){
-  var peso=parseFloat(u.peso)||75, alt=parseFloat(u.alt)||170;
-  var edad=calcEdad(u.fnac), act=parseFloat(u.act)||1.55;
-  var tmb=u.genero==='H'?(88.362+13.397*peso+4.799*alt-5.677*edad):(447.593+9.247*peso+3.098*alt-4.330*edad);
-  var tdee=Math.round(tmb*act);
-  var kcal={recomp:Math.round(tdee*0.90),perdida:Math.round(tdee*0.80),volumen:Math.round(tdee*1.08),mant:tdee}[u.obj]||Math.round(tdee*0.90);
-  var prot=Math.round(peso*2.0);
-  var grasa=Math.round(kcal*0.25/9);
-  var carbs=Math.round((kcal-prot*4-grasa*9)/4);
-  var agua=Math.round(peso*35);
-  return{kcal,prot,carbs,grasa,agua,tdee,imc:(peso/((alt/100)*(alt/100))).toFixed(1)};
+  // ── Datos base ──
+  var peso=parseFloat(u.peso)||75;
+  var alt=parseFloat(u.alt)||170;
+  var edad=calcEdad(u.fnac)||30;
+  var act=parseFloat(u.act)||1.55;
+  var grasaPct=parseFloat(u.grasa)||null;
+  var obj=u.obj||'recomp';
+  var deficit=parseInt(u.deficit)||20;
+  var dieta=u.dieta||'equilibrada';
+  var esH=u.genero==='H';
+
+  // ── BMR: Mifflin-St Jeor (más preciso que Harris-Benedict) ──
+  var bmr=esH
+    ?(10*peso + 6.25*alt - 5*edad + 5)
+    :(10*peso + 6.25*alt - 5*edad - 161);
+
+  // ── TDEE ──
+  var tdee=Math.round(bmr*act);
+
+  // ── Masa magra (si hay % grasa) ──
+  var masaMagra=grasaPct ? Math.round(peso*(1-grasaPct/100)) : Math.round(peso*0.80);
+
+  // ── Calorías objetivo según objetivo y déficit ──
+  var kcal;
+  var deficitReal=0;
+  if(obj==='perdida'){
+    deficitReal=deficit; // % definido por usuario
+    kcal=Math.round(tdee*(1-deficit/100));
+  } else if(obj==='recomp'){
+    deficitReal=10;
+    kcal=Math.round(tdee*0.90);
+  } else if(obj==='volumen'){
+    deficitReal=-8; // superávit
+    kcal=Math.round(tdee*1.08);
+  } else {
+    kcal=tdee;
+  }
+
+  // ── Proteína basada en masa magra (endocrinología clínica) ──
+  // Pérdida de grasa: 2.2-2.4 g/kg masa magra; recomp: 2.0-2.2; volumen: 1.8-2.0
+  var protMultiplier=(obj==='perdida')?2.3:(obj==='recomp')?2.1:(obj==='volumen')?1.9:1.8;
+  var prot=Math.round(masaMagra*protMultiplier);
+  // Asegurar que prot no supere el 40% de las calorías
+  var protMax=Math.round(kcal*0.40/4);
+  if(prot>protMax) prot=protMax;
+  var protKcal=prot*4;
+
+  // ── Distribución carbs/grasas según tipo de dieta ──
+  var kcalRestantes=kcal-protKcal;
+  var grasa, carbs;
+  if(dieta==='keto'){
+    // Keto: ≤50g carbs, resto grasas
+    carbs=Math.min(40, Math.round(kcalRestantes*0.05/4));
+    grasa=Math.round((kcalRestantes-carbs*4)/9);
+  } else if(dieta==='lowcarb'){
+    // Low carb: ~25% carbs, 45% grasas
+    grasa=Math.round(kcalRestantes*0.65/9);
+    carbs=Math.round((kcalRestantes-grasa*9)/4);
+  } else {
+    // Equilibrada: 25% grasas, resto carbs
+    grasa=Math.round(kcal*0.25/9);
+    carbs=Math.round((kcal-protKcal-grasa*9)/4);
+  }
+  if(carbs<0) carbs=0;
+
+  // ── Agua ──
+  var agua=Math.round(peso*35 + (act>1.55?500:0));
+
+  // ── IMC ──
+  var imc=(peso/((alt/100)*(alt/100))).toFixed(1);
+
+  // ── Velocidad pérdida de grasa estimada ──
+  // 1 kg grasa = 7700 kcal. Déficit semanal = déficit diario * 7
+  var deficitDiario=tdee-kcal;
+  var perdidaSemanalKg=(deficitDiario*7/7700).toFixed(2);
+  var perdidaMensualKg=(deficitDiario*30/7700).toFixed(1);
+  // Semanas hasta objetivo (si hay % grasa)
+  var semanasObj=null;
+  if(grasaPct && obj==='perdida'){
+    var grasaKgActual=peso*grasaPct/100;
+    var grasaKgObj=esH?peso*0.12:peso*0.20; // 12% H, 20% M como objetivo
+    var grasaAPerder=Math.max(0,grasaKgActual-grasaKgObj);
+    semanasObj=deficitDiario>0?Math.round(grasaAPerder*7700/(deficitDiario*7)):null;
+  }
+
+  return{
+    bmr:Math.round(bmr), tdee, kcal, prot, carbs, grasa, agua, imc,
+    masaMagra, deficitReal, deficitDiario:Math.round(deficitDiario),
+    perdidaSemanalKg, perdidaMensualKg, semanasObj, dieta,
+    pctProt:Math.round(prot*4/kcal*100),
+    pctCarbs:Math.round(carbs*4/kcal*100),
+    pctGrasa:Math.round(grasa*9/kcal*100)
+  };
 }
 
 // ── RESTRICCIONES ─────────────────────────────
@@ -698,11 +853,11 @@ function getPlanNutricion(u, mac, rests){
 
   if(esH){
     return[
-      {dia:'Lunes',label:'Entreno Push',comidas:[
-        {n:'Desayuno',h:'07:30',k:Math.round(k*0.22),items:['3 '+huevos+'s revueltos con AOVE','80g '+carb1+' con canela en agua','1 plátano','Café negro']},
-        {n:'Pre-entreno',h:'10:30',k:Math.round(k*0.12),items:['30g Whey Isolate'+(noSoja?' sin soja':''),'100g boniato cocido','15g nueces']},
-        {n:'Almuerzo post-entreno',h:'14:00',k:Math.round(k*0.32),items:['200g pechuga de pollo a la plancha','150g quinoa cocida','Ensalada verde con AOVE y limón','½ aguacate']},
-        {n:'Merienda',h:'17:30',k:Math.round(k*0.10),items:['2 '+huevos+'s duros','25g nueces','1 manzana']},
+      {dia:'Lunes',label:'Entreno Push · '+mac.kcal+' kcal · '+mac.prot+'g P / '+mac.carbs+'g C / '+mac.grasa+'g G',comidas:[
+        {n:'Desayuno',h:'07:30',k:Math.round(k*0.22),items:['3 '+huevos+'s revueltos con AOVE (15g aceite)','80g '+carb1+' cocida en agua con canela','1 plátano mediano (100g)','Café negro sin azúcar']},
+        {n:'Pre-entreno (10:30)',h:'10:30',k:Math.round(k*0.12),items:['30g Whey Isolate'+(noSoja?' sin soja':''),'100g boniato cocido (1 mediano)','15g nueces (≈6 unidades)']},
+        {n:'Almuerzo post (14:00)',h:'14:00',k:Math.round(k*0.32),items:['200g pechuga de pollo a la plancha','150g quinoa cocida (≈55g en seco)','Ensalada verde ilimitada con 10ml AOVE + limón','½ aguacate (75g)']},
+        {n:'Merienda (17:30)',h:'17:30',k:Math.round(k*0.10),items:['2 '+huevos+'s duros (140g)','25g nueces (≈10 unidades)','1 manzana mediana (150g)']},
         {n:'Cena',h:'21:00',k:Math.round(k*0.24),items:['180g salmón al horno','200g boniato asado','Brócoli + pimiento salteado con AOVE']}
       ]},
       {dia:'Martes',label:'Entreno Piernas',comidas:[
@@ -895,6 +1050,11 @@ $('s2-next').addEventListener('click',function(){
 });
 $('s3-back').addEventListener('click',function(){obShow('s2');});
 
+// Mostrar/ocultar déficit según objetivo en onboarding
+$('ob-obj').addEventListener('change',function(){
+  $('fg-deficit').style.display=(this.value==='perdida')?'':'none';
+});
+
 $('s3-next').addEventListener('click',function(){
   var rests=[].slice.call(document.querySelectorAll('#rest-grid .rest-btn.rest-sel')).map(function(b){return b.getAttribute('data-rest');});
   obShow('s4');
@@ -912,6 +1072,8 @@ function crearPerfil(rests){
     peso:$('ob-peso').value,
     grasa:$('ob-grasa').value,
     obj:$('ob-obj').value,
+    deficit:$('ob-deficit').value||'20',
+    dieta:$('ob-dieta').value||'equilibrada',
     act:$('ob-act').value,
     exp:$('ob-exp').value,
     rests:rests,
@@ -998,8 +1160,68 @@ function initApp(){
   $('med-ok').addEventListener('click',saveMedida);
 
   $('btn-ia').addEventListener('click',runIA);
-  $('btn-save-cfg').addEventListener('click',function(){ANTHROPIC_KEY=$('cfg-key').value.trim();localStorage.setItem('specimen_apikey',ANTHROPIC_KEY);toast('Config guardada ✓');});
-  $('btn-logout').addEventListener('click',function(){if(confirm('¿Cerrar sesión?')){location.reload();}});
+  $('btn-save-cfg').addEventListener('click',function(){
+    ANTHROPIC_KEY=$('cfg-key').value.trim();
+    localStorage.setItem('specimen_apikey',ANTHROPIC_KEY);
+    var gk=$('cfg-gemini').value.trim();
+    if(gk) localStorage.setItem('specimen_gemini',gk);
+    toast('Configuración guardada ✓');
+  });
+
+  // Edit objetivo live toggle
+  var editObj=$('edit-obj');
+  if(editObj){
+    editObj.addEventListener('change',function(){
+      var fgd=$('edit-fg-deficit');
+      if(fgd) fgd.style.display=(this.value==='perdida')?'':'none';
+    });
+  }
+
+  // Save edited objetivo/dieta/peso
+  var btnEs=$('btn-edit-save');
+  if(btnEs){
+    btnEs.addEventListener('click',function(){
+      var u=U();
+      var newObj=$('edit-obj').value;
+      var newDef=$('edit-deficit').value||'20';
+      var newDieta=$('edit-dieta').value||'equilibrada';
+      var newPeso=$('edit-peso').value;
+      u.obj=newObj;
+      u.deficit=newDef;
+      u.dieta=newDieta;
+      if(newPeso&&parseFloat(newPeso)>0) u.peso=newPeso;
+      // Recalculate macros and regenerate plan
+      u.macros=calcMacros(u);
+      u.planNut=getPlanNutricion(u, u.macros, u.rests||[]);
+      saveAll();
+      renderPerfil();
+      renderHome();
+      toast('Plan actualizado ✓ · '+{recomp:'Recomposición',perdida:'Pérdida de grasa',volumen:'Volumen',mant:'Mantenimiento'}[newObj]);
+    });
+  }
+  $('btn-logout').addEventListener('click',function(){
+    if(confirm('¿Cerrar sesión? Tu progreso se mantiene guardado.')){
+      APP.users=[];APP.cur=0;
+      // Keep users data but clear session
+      var saved=localStorage.getItem(STORE_KEY);
+      if(saved){
+        try{var d=JSON.parse(saved);APP.users=d.users||[];}catch(e){}
+      }
+      APP.cur=0;
+      // Show onboarding login
+      document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+      $('sc-home').classList.add('active');
+      document.querySelectorAll('.bn').forEach(function(b){b.classList.remove('on');});
+      document.querySelector('.bn[data-s="home"]').classList.add('on');
+      $('onb').style.display='';
+      // Reset onboarding to welcome screen
+      ['s1','s2','s3','s4','s-login'].forEach(function(s){var el=$(s);if(el)el.style.display='none';});
+      $('s1').style.display='';
+      $('ob-nombre').value='';$('ob-email').value='';$('ob-pw').value='';
+      ONB.genero=null;
+      $('gc-h').className='gender-card';$('gc-m').className='gender-card';
+    }
+  });
 
   $('timer-tog').addEventListener('click',toggleTimer);
   $('timer-rst').addEventListener('click',resetTimer);
@@ -1440,28 +1662,86 @@ async function runIA(){
     return;
   }
 
-  // ── Con API Key de Anthropic ──
-  var prompt='Eres entrenador personal y nutricionista experto. Analiza este progreso semanal y responde SOLO JSON válido:\n{"resumen":"","ajustes_entreno":[""],"ajustes_nutricion":[""],"recomendacion":"","nivel":"bueno"}\n\nDATOS:\nGénero: '+(u.genero==='H'?'Hombre':'Mujer')+'\nObjetivo: '+LABEL_OBJ[u.obj||'recomp']+'\nSesiones semana: '+sesUlt7.length+'/5\nRPE promedio: '+(sesUlt7.reduce(function(a,s){return a+(parseFloat(s.rpe)||7);},0)/Math.max(1,sesUlt7.length)).toFixed(1)+'\nPeso anterior: '+(prevMed.peso||u.peso||'—')+' kg → actual: '+(lastMed.peso||u.peso||'—')+' kg\nCintura: '+(prevMed.cin||'—')+' → '+(lastMed.cin||'—')+' cm';
+  // ── Con API Key (Gemini gratis primero, luego Anthropic) ──
+  var activeKey=GEMINI_KEY||ANTHROPIC_KEY;
+  var useGemini=!!GEMINI_KEY;
+  var mac2=u.macros||calcMacros(u);
+  var prompt='Eres un endocrinólogo clínico y entrenador fitness experto en recomposición corporal. Analiza el siguiente progreso semanal y responde ÚNICAMENTE con JSON válido, sin texto extra, sin bloques de código:\n{"resumen":"análisis clínico breve","ajustes_entreno":["ajuste1","ajuste2"],"ajustes_nutricion":["ajuste1","ajuste2"],"recomendacion":"plan concreto próxima semana","nivel":"bueno"}\n\nDATOS DEL USUARIO:\nGénero: '+(u.genero==='H'?'Hombre':'Mujer')+'\nObjetivo: '+LABEL_OBJ[u.obj||'recomp']+'\nBMR: '+mac2.bmr+' kcal · TDEE: '+mac2.tdee+' kcal · Objetivo: '+mac2.kcal+' kcal (déficit '+mac2.deficitReal+'%)\nMasa magra: '+mac2.masaMagra+' kg · % Grasa: '+(u.grasa||'—')+'%\nSesiones semana: '+sesUlt7.length+'/5\nRPE promedio: '+(sesUlt7.reduce(function(a,s){return a+(parseFloat(s.rpe)||7);},0)/Math.max(1,sesUlt7.length)).toFixed(1)+'/10\nPeso anterior: '+(prevMed.peso||u.peso||'—')+' kg → actual: '+(lastMed.peso||u.peso||'—')+' kg\nCintura: '+(prevMed.cin||'—')+' → '+(lastMed.cin||'—')+' cm';
   try{
-    var resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:700,messages:[{role:'user',content:prompt}]})});
-    var d=await resp.json(); var txt=d.content[0].text.replace(/```json|```/g,'').trim();
-    var aj=JSON.parse(txt);
+    var resp, txt, aj;
+    if(useGemini){
+      // Gemini 2.0 Flash - GRATIS
+      var gUrl='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_KEY;
+      var gBody={contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.4,maxOutputTokens:800}};
+      resp=await fetch(gUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(gBody)});
+      var gd=await resp.json();
+      if(gd.error) throw new Error('Gemini: '+gd.error.message);
+      txt=gd.candidates[0].content.parts[0].text.replace(/```json|```/g,'').trim();
+    } else {
+      // Anthropic
+      resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,messages:[{role:'user',content:prompt}]})});
+      var ad=await resp.json();
+      txt=ad.content[0].text.replace(/```json|```/g,'').trim();
+    }
+    aj=JSON.parse(txt);
     var niv={'bueno':'b','regular':'r','necesita_mejorar':'m'}[aj.nivel]||'r';
     var nivLabel={'bueno':'✅ Buen progreso','regular':'⚡ Progreso regular','necesita_mejorar':'⚠️ Necesita ajustes'}[aj.nivel]||'⚡';
     $r.innerHTML='<div class="ia-card"><div class="ia-nivel '+niv+'">'+nivLabel+'</div>'
       +'<div style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:10px;">'+aj.resumen+'</div>'
       +'<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;margin:8px 0 4px;">💪 Entreno</div>'
-      +(aj.ajustes_entreno||[]).map(function(a){return '<div style="font-size:13px;color:var(--t2);padding:3px 0;display:flex;gap:7px;"><span style="color:var(--acc2);">→</span>'+a+'</div>';}).join('')
+      +(aj.ajustes_entreno||[]).map(function(a){return '<div style="font-size:13px;color:var(--t2);padding:4px 0;display:flex;gap:7px;"><span style="color:var(--acc2);">→</span><span>'+a+'</span></div>';}).join('')
       +'<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;margin:8px 0 4px;">🥗 Nutrición</div>'
-      +(aj.ajustes_nutricion||[]).map(function(a){return '<div style="font-size:13px;color:var(--t2);padding:3px 0;display:flex;gap:7px;"><span style="color:var(--green);">→</span>'+a+'</div>';}).join('')
+      +(aj.ajustes_nutricion||[]).map(function(a){return '<div style="font-size:13px;color:var(--t2);padding:4px 0;display:flex;gap:7px;"><span style="color:var(--green);">→</span><span>'+a+'</span></div>';}).join('')
       +'<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;margin:8px 0 4px;">📅 Próxima semana</div>'
-      +'<div style="font-size:13px;color:var(--text);line-height:1.6;">'+aj.recomendacion+'</div></div>';
-  }catch(e){$r.innerHTML='<div style="font-size:13px;color:var(--red);">Error: '+e.message+'</div>';}
+      +'<div style="font-size:13px;color:var(--text);line-height:1.6;">'+aj.recomendacion+'</div>'
+      +'<div style="font-size:10px;color:var(--t3);margin-top:8px;border-top:1px solid var(--border);padding-top:6px;">Análisis con '+(useGemini?'Gemini 2.0 Flash (Google · gratuito)':'Claude Sonnet (Anthropic)')+'</div>'
+      +'</div>';
+  }catch(e){$r.innerHTML='<div style="font-size:13px;color:var(--red);">Error IA: '+e.message+'<br><span style="font-size:12px;color:var(--t2);">Verifica tu API key en Perfil → Configuración.</span></div>';}
 }
 
 // ── PERFIL ────────────────────────────────────
+function renderCalcMetabolica(u, mac){
+  var obj=u.obj||'recomp';
+  var dietaLabel={'equilibrada':'Equilibrada','lowcarb':'Baja en carbos','keto':'Cetogénica'}[mac.dieta||'equilibrada'];
+  var objLabel={'recomp':'Recomposición','perdida':'Pérdida de grasa','volumen':'Ganancia muscular','mant':'Mantenimiento'}[obj];
+  var velColor=mac.perdidaSemanalKg>0.8?'var(--red)':mac.perdidaSemanalKg>0.3?'var(--green)':'var(--blue)';
+  var html='';
+  html+='<div class="calc-row"><span class="calc-lbl">Fórmula BMR</span><span class="calc-val" style="color:var(--t2);font-size:12px;">Mifflin-St Jeor</span></div>';
+  html+='<div class="calc-row"><span class="calc-lbl">BMR (metabolismo basal)</span><span class="calc-val" style="color:var(--blue);">'+mac.bmr+' kcal</span></div>';
+  html+='<div class="calc-row"><span class="calc-lbl">TDEE (gasto total)</span><span class="calc-val" style="color:var(--acc2);">'+mac.tdee+' kcal</span></div>';
+  html+='<div class="calc-row"><span class="calc-lbl">Masa magra estimada</span><span class="calc-val">'+mac.masaMagra+' kg</span></div>';
+  html+='<div class="calc-row"><span class="calc-lbl">Objetivo</span><span class="calc-val">'+objLabel+'</span></div>';
+  html+='<div class="calc-row"><span class="calc-lbl">Tipo de alimentación</span><span class="calc-val">'+dietaLabel+'</span></div>';
+  if(obj==='perdida'||obj==='recomp'){
+    html+='<div class="calc-row"><span class="calc-lbl">Déficit calórico</span><span class="calc-val" style="color:var(--red);">-'+mac.deficitDiario+' kcal/día ('+mac.deficitReal+'%)</span></div>';
+  }
+  html+='<div style="background:var(--bg3);border-radius:var(--r);padding:11px;margin:10px 0;">';
+  html+='<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">🎯 Calorías objetivo: '+mac.kcal+' kcal/día</div>';
+  html+='<div class="calc-macro-grid">';
+  html+='<div class="calc-macro"><div class="calc-macro-v" style="color:var(--acc2);">'+mac.prot+'g</div><div class="calc-macro-l">Proteína</div><div style="font-size:9px;color:var(--t3);">'+mac.pctProt+'%</div></div>';
+  html+='<div class="calc-macro"><div class="calc-macro-v" style="color:var(--green);">'+mac.carbs+'g</div><div class="calc-macro-l">Carbos</div><div style="font-size:9px;color:var(--t3);">'+mac.pctCarbs+'%</div></div>';
+  html+='<div class="calc-macro"><div class="calc-macro-v" style="color:var(--amber);">'+mac.grasa+'g</div><div class="calc-macro-l">Grasas</div><div style="font-size:9px;color:var(--t3);">'+mac.pctGrasa+'%</div></div>';
+  html+='<div class="calc-macro"><div class="calc-macro-v" style="color:var(--blue);">'+Math.round(mac.agua/1000*10)/10+'L</div><div class="calc-macro-l">Agua</div><div style="font-size:9px;color:var(--t3);">diaria</div></div>';
+  html+='</div></div>';
+  if(parseFloat(mac.perdidaSemanalKg)>0){
+    html+='<div class="velocidad-tag" style="background:var(--gb);color:var(--green);">📉 Pérdida estimada: ~'+mac.perdidaSemanalKg+' kg/semana · ~'+mac.perdidaMensualKg+' kg/mes</div>';
+    if(mac.semanasObj) html+='<div style="font-size:12px;color:var(--t2);">📅 Semanas estimadas hasta objetivo: <b style="color:var(--text);">'+mac.semanasObj+' semanas</b></div>';
+  }
+  if(obj==='perdida'){
+    html+='<div style="margin-top:10px;font-size:12px;color:var(--t2);line-height:1.7;">';
+    html+='<b style="color:var(--acc2);">Recomendaciones clínicas:</b><br>';
+    html+='• Proteína alta ('+mac.prot+'g/día) para preservar masa muscular en déficit.<br>';
+    html+='• Entrenamiento de fuerza 4-5x/semana — evita cardio excesivo que cataboliza músculo.<br>';
+    html+='• Déficit del '+mac.deficitReal+'% es '+(mac.deficitReal<=15?'suave y sostenible':mac.deficitReal<=20?'moderado y óptimo':'agresivo — no mantener más de 8-12 semanas')+'.<br>';
+    html+='• Dormir 7-9h — la hormona de crecimiento es clave para preservar músculo.<br>';
+    html+='• Pasos diarios: mínimo 8.000-10.000/día para maximizar el gasto no ejercicio (NEAT).';
+    html+='</div>';
+  }
+  $('calc-metabolica').innerHTML=html;
+}
+
 function renderPerfil(){
-  var u=U(); var mac=u.macros||{}; var esH=u.genero==='H';
+  var u=U(); var mac=u.macros||calcMacros(u); var esH=u.genero==='H';
   $('perfil-card').innerHTML='<div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">'
     +'<div style="width:54px;height:54px;border-radius:50%;background:'+(esH?'var(--accb)':'var(--pb)')+';display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:'+(esH?'var(--acc2)':'var(--pink)')+';">'+(u.nombre||'?')[0].toUpperCase()+'</div>'
     +'<div><div style="font-size:17px;font-weight:800;">'+u.nombre+'</div><div style="font-size:12px;color:var(--t2);">'+u.email+'</div>'
@@ -1504,6 +1784,18 @@ function renderPerfil(){
       +'</div></div>';
   }).join('');
   $('cfg-key').value=ANTHROPIC_KEY;
+  var cgem=$('cfg-gemini'); if(cgem) cgem.value=GEMINI_KEY;
+
+  // Render calculadora metabólica
+  renderCalcMetabolica(u, mac);
+
+  // Populate edit selectors with current user values
+  var eo=$('edit-obj'); if(eo)eo.value=u.obj||'recomp';
+  var ed=$('edit-deficit'); if(ed)ed.value=u.deficit||'20';
+  var edt=$('edit-dieta'); if(edt)edt.value=u.dieta||'equilibrada';
+  var ep=$('edit-peso'); if(ep)ep.placeholder='Actual: '+u.peso+' kg';
+  // Show/hide deficit field based on current obj
+  var fgd=$('edit-fg-deficit'); if(fgd)fgd.style.display=(u.obj==='perdida')?'':'none';
 }
 
 // ── TIMER ─────────────────────────────────────
