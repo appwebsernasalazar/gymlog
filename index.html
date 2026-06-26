@@ -1,1153 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0a0a0f">
-<title>FitLog Pro</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-:root{
-  --bg:#0a0a0f;--bg2:#111118;--bg3:#18181f;--bg4:#22222c;--bg5:#2a2a38;
-  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);
-  --text:#eeeef5;--t2:#8888a0;--t3:#4a4a62;
-  --acc:#6c4fff;--acc2:#9b7fff;--accb:rgba(108,79,255,0.15);
-  --green:#22c55e;--gb:rgba(34,197,94,0.12);
-  --amber:#f59e0b;--ab:rgba(245,158,11,0.12);
-  --red:#ef4444;--rb:rgba(239,68,68,0.12);
-  --blue:#3b82f6;--bb:rgba(59,130,246,0.12);
-  --pink:#ec4899;--pb:rgba(236,72,153,0.12);
-  --teal:#14b8a6;--tb:rgba(20,184,166,0.12);
-  --r:10px;--rl:14px;
-  --safe:env(safe-area-inset-bottom,0px);
-}
-html,body{height:100%;overflow:hidden;}
-body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.5;display:flex;flex-direction:column;}
-
-/* TOPBAR */
-.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10;}
-.topbar-logo{font-weight:800;font-size:18px;background:linear-gradient(135deg,var(--acc2),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.topbar-title{font-size:15px;font-weight:600;color:var(--text);}
-.user-switch{display:flex;gap:4px;}
-.user-btn{padding:4px 10px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--t2);transition:all 0.15s;}
-.user-btn.active-u1{background:var(--accb);color:var(--acc2);border-color:var(--acc);}
-.user-btn.active-u2{background:var(--pb);color:var(--pink);border-color:var(--pink);}
-
-/* CONTENT */
-.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 13px;padding-bottom:calc(74px + var(--safe));}
-
-/* BOTTOM NAV */
-.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);display:flex;padding-bottom:var(--safe);z-index:100;}
-.bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 7px;border:none;background:transparent;color:var(--t3);font-size:10px;font-weight:500;cursor:pointer;gap:3px;min-height:52px;}
-.bn.on{color:var(--acc2);}
-.bn.on.u2{color:var(--pink);}
-.bn-ico{font-size:20px;line-height:1;}
-
-/* SCREEN */
-.screen{display:none;}.screen.active{display:block;}
-
-/* CARDS */
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:15px;margin-bottom:11px;}
-.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;}
-.card-title{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.08em;}
-
-/* STATS */
-.sg{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:11px;}
-.sg4{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;}
-.stat{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:13px 11px;text-align:center;}
-.stat-val{font-size:24px;font-weight:700;line-height:1;margin-bottom:3px;}
-.stat-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.05em;}
-.stat-sub{font-size:11px;color:var(--t2);margin-top:2px;}
-
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:inherit;min-height:44px;}
-.btn-acc{background:var(--acc);border-color:var(--acc);color:#fff;}
-.btn-pink{background:var(--pink);border-color:var(--pink);color:#fff;}
-.btn-sm{padding:6px 12px;font-size:12px;min-height:36px;}
-.btn-full{width:100%;padding:13px;}
-.btn-d{background:var(--rb);border-color:var(--red);color:var(--red);}
-.btn-ghost{background:transparent;border-color:var(--border2);color:var(--t2);}
-
-/* FORMS */
-.fg{margin-bottom:11px;}
-label{display:block;font-size:11px;font-weight:700;color:var(--t2);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;}
-input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:inherit;font-size:15px;padding:10px 12px;outline:none;-webkit-appearance:none;transition:border 0.15s;}
-input:focus,select:focus,textarea:focus{border-color:var(--acc);}
-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238888a0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;}
-.fr{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
-.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
-
-/* LIST ITEMS */
-.li{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px 13px;margin-bottom:7px;cursor:pointer;transition:border 0.15s;}
-.li:hover{border-color:var(--border2);}
-.li-title{font-weight:600;font-size:14px;margin-bottom:2px;}
-.li-sub{font-size:12px;color:var(--t2);}
-.li-meta{font-size:11px;color:var(--t3);margin-top:2px;}
-
-/* EXERCISE */
-.ex-row{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:11px 12px;margin-bottom:6px;display:flex;align-items:flex-start;gap:9px;}
-.ex-info{flex:1;}
-.ex-name{font-weight:600;font-size:14px;}
-.ex-det{font-size:12px;color:var(--t2);margin-top:2px;}
-.ex-kg{font-size:16px;font-weight:700;color:var(--acc2);white-space:nowrap;}
-
-/* PLAN */
-.plan-day{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);margin-bottom:7px;overflow:hidden;}
-.plan-hdr{display:flex;align-items:center;gap:10px;padding:12px 13px;cursor:pointer;}
-.plan-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.plan-info{flex:1;}
-.plan-name{font-weight:700;font-size:14px;}
-.plan-sub{font-size:11px;color:var(--t3);margin-top:1px;}
-.plan-chev{font-size:11px;color:var(--t3);transition:transform 0.2s;}
-.plan-chev.open{transform:rotate(180deg);}
-.plan-body{display:none;border-top:1px solid var(--border);padding:12px 13px;}
-.plan-body.open{display:block;}
-.plan-note{font-size:12px;color:var(--amber);background:var(--ab);border-radius:6px;padding:6px 10px;margin-bottom:10px;}
-.plan-ex-row{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--border);}
-.plan-ex-row:last-child{border-bottom:none;}
-.plan-ex-name{font-size:13px;font-weight:500;flex:1;padding-right:6px;}
-.plan-ex-s{font-size:10px;color:var(--t3);}
-.plan-ws{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
-.pw{font-size:11px;font-weight:600;padding:1px 6px;border-radius:4px;}
-.pw1{background:var(--bb);color:var(--blue);}
-.pw2{background:var(--gb);color:var(--green);}
-.pw3{background:var(--ab);color:var(--amber);}
-
-/* BADGES */
-.badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 8px;border-radius:100px;margin:2px;}
-.bg{background:var(--gb);color:var(--green);}
-.ba{background:var(--ab);color:var(--amber);}
-.br{background:var(--rb);color:var(--red);}
-.bb2{background:var(--bb);color:var(--blue);}
-.bp{background:var(--accb);color:var(--acc2);}
-.bt{background:var(--tb);color:var(--teal);}
-.bpk{background:var(--pb);color:var(--pink);}
-
-/* MEDIDAS */
-.med-g{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
-.med-c{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:11px 12px;}
-.med-v{font-size:21px;font-weight:700;}
-.med-u{font-size:12px;color:var(--t3);}
-.med-l{font-size:11px;color:var(--t2);margin-top:2px;}
-.med-d{font-size:11px;margin-top:2px;font-weight:600;}
-.dd{color:var(--green);}.du{color:var(--red);}
-
-/* HYDRATION */
-.hyd-bar{height:12px;background:var(--bg4);border-radius:6px;overflow:hidden;margin:8px 0;}
-.hyd-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--teal));border-radius:6px;transition:width 0.4s;}
-.hyd-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px;}
-.hyd-btn{padding:9px;border-radius:var(--r);font-size:13px;font-weight:600;text-align:center;cursor:pointer;border:1px solid var(--bb);background:var(--bb);color:var(--blue);}
-
-/* CALCULA */
-.calc-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
-.calc-row:last-child{border-bottom:none;}
-.calc-label{color:var(--t2);}
-.calc-val{font-weight:600;}
-
-/* SUPL */
-.supl{display:flex;gap:11px;padding:11px 0;border-bottom:1px solid var(--border);}
-.supl:last-child{border-bottom:none;}
-.supl-ico{font-size:20px;min-width:28px;text-align:center;}
-.supl-body{flex:1;}
-.supl-name{font-size:13px;font-weight:600;margin-bottom:2px;}
-.supl-desc{font-size:12px;color:var(--t2);line-height:1.55;}
-.prio{font-size:10px;font-weight:700;padding:2px 6px;border-radius:100px;display:inline-block;margin-top:3px;}
-
-/* MODAL */
-.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:200;align-items:flex-end;justify-content:center;}
-.modal-ov.open{display:flex;}
-.modal{background:var(--bg2);border-radius:20px 20px 0 0;padding:18px 16px;width:100%;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-.modal-hnd{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 14px;}
-.modal-title{font-size:17px;font-weight:700;margin-bottom:14px;}
-.modal-actions{display:flex;gap:8px;margin-top:13px;padding-bottom:calc(var(--safe) + 6px);}
-
-/* TOAST */
-.toast{position:fixed;bottom:calc(68px + var(--safe));left:50%;transform:translateX(-50%) translateY(8px);background:var(--bg4);border:1px solid var(--green);color:var(--green);padding:9px 18px;border-radius:100px;font-size:13px;font-weight:600;z-index:300;opacity:0;transition:all 0.22s;pointer-events:none;white-space:nowrap;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-.empty{text-align:center;padding:44px 16px;color:var(--t3);}
-.empty-ico{font-size:36px;margin-bottom:10px;}
-.sep{height:1px;background:var(--border);margin:13px 0;}
-.section-title{font-size:21px;font-weight:800;margin-bottom:3px;}
-.section-sub{font-size:13px;color:var(--t2);margin-bottom:13px;}
-.tip-block{border-left:3px solid var(--acc);padding:9px 12px;margin-bottom:9px;background:var(--bg3);border-radius:0 var(--r) var(--r) 0;}
-.tip-block.ok{border-left-color:var(--green);}
-.tip-block.warn{border-left-color:var(--amber);}
-.tip-t{font-size:12px;font-weight:700;margin-bottom:3px;color:var(--acc2);}
-.tip-block.ok .tip-t{color:var(--green);}
-.tip-block.warn .tip-t{color:var(--amber);}
-.tip-b{font-size:12px;color:var(--t2);line-height:1.6;}
-
-/* ONBOARDING */
-.onb{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;flex-direction:column;padding:24px 20px;padding-bottom:calc(var(--safe)+24px);}
-.onb-hidden{display:none;}
-.onb-title{font-size:26px;font-weight:800;margin-bottom:6px;}
-.onb-sub{font-size:14px;color:var(--t2);margin-bottom:24px;line-height:1.5;}
-.onb-avatar{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:16px;}
-.progress-dots{display:flex;gap:6px;margin-bottom:20px;}
-.prog-dot{width:8px;height:8px;border-radius:50%;background:var(--border2);}
-.prog-dot.on{background:var(--acc2);}
-
-@media(max-width:380px){.content{padding:12px 10px;}}
-
-/* GUIA EJERCICIO */
-.guia-tab{padding:6px 14px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--t2);font-family:inherit;}
-.guia-tab.active{background:var(--accb);color:var(--acc2);border-color:var(--acc);}
-.step-item{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--t2);line-height:1.5;}
-.step-item:last-child{border-bottom:none;}
-.step-num{width:22px;height:22px;border-radius:50%;background:var(--accb);color:var(--acc2);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
-.err-item{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--red);}
-.err-item:last-child{border-bottom:none;}
-/* FICHA */
-.ficha-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rl);padding:16px;margin-bottom:11px;}
-.ficha-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;}
-.ficha-row:last-child{border-bottom:none;}
-.ficha-label{color:var(--t2);}
-.ficha-val{font-weight:600;}
-/* AI loading */
-.ai-loading{text-align:center;padding:20px;color:var(--t2);}
-.ai-loading-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--acc2);margin:0 3px;animation:bounce 1.2s infinite;}
-.ai-loading-dot:nth-child(2){animation-delay:0.2s;}
-.ai-loading-dot:nth-child(3){animation-delay:0.4s;}
-@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-10px)}}
-
-</style>
-</head>
-<body>
-
-<!-- ONBOARDING -->
-<div class="onb" id="onb">
-  <div id="onb-step-1">
-    <div class="onb-avatar" style="background:var(--accb);">💪</div>
-    <div style="display:flex;gap:6px;margin-bottom:20px;">
-      <div class="prog-dot on"></div><div class="prog-dot"></div><div class="prog-dot"></div>
-    </div>
-    <div class="onb-title">Bienvenido a FitLog Pro</div>
-    <div class="onb-sub">Tu app de entrenamiento y nutrición personalizada. Primero vamos a configurar tu perfil.</div>
-    <div class="fg"><label>¿Quién eres?</label>
-      <select id="onb-quien">
-        <option value="u1">Soy el usuario principal (hombre)</option>
-        <option value="u2">Soy la segunda usuaria (mujer)</option>
-      </select>
-    </div>
-    <button class="btn btn-acc btn-full" id="onb-next1" style="margin-top:auto;">Continuar →</button>
-  </div>
-
-  <div id="onb-step-2" style="display:none;">
-    <div class="onb-avatar" id="onb-avatar2">🏋️</div>
-    <div style="display:flex;gap:6px;margin-bottom:20px;">
-      <div class="prog-dot on"></div><div class="prog-dot on"></div><div class="prog-dot"></div>
-    </div>
-    <div class="onb-title" id="onb-title2">Tu perfil físico</div>
-    <div class="onb-sub">Estos datos calculan tus calorías, macros e hidratación de forma precisa.</div>
-    <div class="fr">
-      <div class="fg"><label>Nombre</label><input type="text" id="onb-nombre" placeholder="Tu nombre"></div>
-      <div class="fg"><label>Edad</label><input type="number" id="onb-edad" placeholder="38" inputmode="numeric"></div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label>Peso (kg)</label><input type="number" id="onb-peso" step="0.1" placeholder="102.0" inputmode="decimal"></div>
-      <div class="fg"><label>Altura (cm)</label><input type="number" id="onb-altura" placeholder="178" inputmode="numeric"></div>
-    </div>
-    <div class="fg"><label>Objetivo principal</label>
-      <select id="onb-objetivo">
-        <option value="recomp">Recomposición corporal (músculo + perder grasa)</option>
-        <option value="perdida">Pérdida de grasa prioritaria</option>
-        <option value="volumen">Ganancia muscular prioritaria</option>
-        <option value="mantenimiento">Mantenimiento y rendimiento</option>
-      </select>
-    </div>
-    <div class="fg"><label>Nivel de actividad</label>
-      <select id="onb-actividad">
-        <option value="1.375">Ligero (1-2 días/semana)</option>
-        <option value="1.55" selected>Moderado (3-5 días/semana)</option>
-        <option value="1.725">Alto (6-7 días/semana)</option>
-      </select>
-    </div>
-    <div class="fg"><label>Meses de experiencia en gym</label>
-      <select id="onb-experiencia">
-        <option value="0-3">0-3 meses (principiante)</option>
-        <option value="4-12" selected>4-12 meses (intermedio)</option>
-        <option value="12+">+12 meses (avanzado)</option>
-      </select>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:auto;">
-      <button class="btn btn-ghost" id="onb-back2">← Volver</button>
-      <button class="btn btn-acc btn-full" id="onb-next2">Calcular mi plan →</button>
-    </div>
-  </div>
-
-  <div id="onb-step-3" style="display:none;">
-    <div class="onb-avatar" id="onb-avatar3">📊</div>
-    <div style="display:flex;gap:6px;margin-bottom:20px;">
-      <div class="prog-dot on"></div><div class="prog-dot on"></div><div class="prog-dot on"></div>
-    </div>
-    <div class="onb-title">Tu plan calculado</div>
-    <div class="onb-sub">Basado en tus datos. Puedes ajustarlo después.</div>
-    <div id="onb-resultados"></div>
-    <div style="display:flex;gap:8px;margin-top:16px;">
-      <button class="btn btn-ghost" id="onb-back3">← Volver</button>
-      <button class="btn btn-acc btn-full" id="onb-finish">¡Empezar! →</button>
-    </div>
-  </div>
-</div>
-
-<!-- APP -->
-<div class="topbar">
-  <div class="topbar-logo">FitLog</div>
-  <div class="topbar-title" id="page-title">Inicio</div>
-  <div class="user-switch">
-    <button class="user-btn active-u1" id="btn-u1" data-u="u1">Él</button>
-    <button class="user-btn" id="btn-u2" data-u="u2">Ella</button>
-  </div>
-</div>
-
-<div class="content" id="content">
-
-<!-- HOME -->
-<div id="screen-home" class="screen active">
-  <div class="section-title" id="d-greeting">Hola 👋</div>
-  <div class="section-sub" id="d-date"></div>
-  <div class="sg" style="margin-bottom:11px;">
-    <div class="stat"><div class="stat-val" id="d-peso" style="color:var(--acc2);">—</div><div class="stat-lbl">Peso kg</div></div>
-    <div class="stat"><div class="stat-val" id="d-imc" style="color:var(--blue);">—</div><div class="stat-lbl">IMC</div></div>
-    <div class="stat"><div class="stat-val" id="d-ses" style="color:var(--green);">0</div><div class="stat-lbl">Sesiones</div></div>
-    <div class="stat"><div class="stat-val" id="d-semana" style="color:var(--amber);">0</div><div class="stat-lbl">Esta semana</div></div>
-  </div>
-  <!-- HYDRATION -->
-  <div class="card">
-    <div class="card-hdr">
-      <div class="card-title">💧 Hidratación hoy</div>
-      <span id="d-hyd-txt" style="font-size:13px;font-weight:600;color:var(--blue);">0 / 0 ml</span>
-    </div>
-    <div class="hyd-bar"><div class="hyd-fill" id="d-hyd-bar" style="width:0%;"></div></div>
-    <div class="hyd-btns">
-      <div class="hyd-btn" id="hyd200">+200ml</div>
-      <div class="hyd-btn" id="hyd350">+350ml</div>
-      <div class="hyd-btn" id="hyd500">+500ml</div>
-    </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
-      <span style="font-size:11px;color:var(--t3);">Orina pálida = bien hidratado ✓</span>
-      <button class="btn btn-sm" id="hyd-reset" style="font-size:11px;padding:4px 8px;min-height:28px;">Resetear</button>
-    </div>
-  </div>
-  <!-- NEXT WORKOUT -->
-  <div class="card"><div class="card-title" style="margin-bottom:9px;">Próximo entreno</div><div id="d-next"></div></div>
-  <!-- MACROS DEL DÍA -->
-  <div class="card">
-    <div class="card-title" style="margin-bottom:9px;">Objetivos diarios</div>
-    <div id="d-macros"></div>
-  </div>
-  <!-- RECENT -->
-  <div class="card"><div class="card-title" style="margin-bottom:9px;">Últimas sesiones</div><div id="d-recent"></div></div>
-</div>
-
-<!-- SESION -->
-<div id="screen-sesion" class="screen">
-  <div class="section-title">Nueva sesión</div>
-  <div class="section-sub">Registra tu entreno de hoy</div>
-  <div class="card">
-    <div class="fg"><label>Fecha</label><input type="date" id="s-fecha"></div>
-    <div class="fg"><label>Tipo de entreno</label>
-      <select id="s-tipo">
-        <option value="Pierna 1 — Cuádriceps / Glúteo / Isquio">Pierna 1 — Cuádriceps/Glúteo/Isquio</option>
-        <option value="Torso 1 — Pecho / Hombro / Tríceps (Push)">Torso 1 — Pecho/Hombro/Tríceps (Push)</option>
-        <option value="Pierna 2 — Glúteo / Femoral / Gemelo">Pierna 2 — Glúteo/Femoral/Gemelo</option>
-        <option value="Torso 2 — Espalda / Bíceps (Pull)">Torso 2 — Espalda/Bíceps (Pull)</option>
-        <option value="Full body + Finisher metabólico">Full body + Finisher</option>
-        <option value="Cardio / LISS / Carrera progresiva">Cardio / LISS / Carrera</option>
-        <option value="Libre">Libre / Extra</option>
-      </select>
-    </div>
-    <div class="fr">
-      <div class="fg"><label>Semana</label>
-        <select id="s-semana"><option>Sem 1</option><option>Sem 2</option><option>Sem 3</option><option>Sem 4</option><option>Sem 5</option><option>Sem 6</option><option>Sem 7</option><option>Sem 8</option></select>
-      </div>
-      <div class="fg"><label>Mesociclo</label>
-        <select id="s-meso"><option>Meso 1</option><option>Meso 2</option><option>Meso 3</option></select>
-      </div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label>Peso hoy (kg)</label><input type="number" id="s-peso" step="0.1" inputmode="decimal" placeholder="—"></div>
-      <div class="fg"><label>Duración (min)</label><input type="number" id="s-dur" inputmode="numeric" placeholder="60"></div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label>RPE (1-10)</label><input type="number" id="s-rpe" min="1" max="10" inputmode="numeric" placeholder="7"></div>
-      <div class="fg"><label>Fatiga general (0-10)</label><input type="number" id="s-fatiga" min="0" max="10" inputmode="numeric" placeholder="5"></div>
-    </div>
-    <div class="fg"><label>Notas</label><textarea id="s-notas" rows="2" placeholder="Sensaciones, energía, descanso previo…"></textarea></div>
-  </div>
-  <div class="card">
-    <div class="card-hdr"><div class="card-title">Ejercicios</div><button class="btn btn-sm" id="btn-add-ex">+ Añadir</button></div>
-    <div id="ex-list"><div class="empty"><div class="empty-ico">🏋️</div><div style="font-size:13px;">Pulsa "+ Añadir"</div></div></div>
-  </div>
-  <button class="btn btn-acc btn-full" id="btn-save-ses">Guardar sesión ✓</button>
-</div>
-
-<!-- HISTORIAL -->
-<div id="screen-historial" class="screen">
-  <div class="section-title">Historial</div>
-  <div class="section-sub" id="hist-sub">0 sesiones</div>
-  <div id="hist-list"></div>
-</div>
-
-<!-- MEDIDAS -->
-<div id="screen-medidas" class="screen">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
-    <div class="section-title">Medidas</div>
-    <button class="btn btn-sm" id="btn-add-med" style="min-height:36px;">+ Registrar</button>
-  </div>
-  <div class="section-sub">Evolución corporal mensual</div>
-  <div class="card"><div class="card-title" style="margin-bottom:9px;">Última medición</div><div id="med-display"><div class="empty"><div class="empty-ico">📏</div><div style="font-size:13px;">Sin medidas aún</div></div></div></div>
-  <div class="card"><div class="card-title" style="margin-bottom:9px;">Seguimiento mensual</div><div id="med-hist"></div></div>
-</div>
-
-<!-- PLAN -->
-<div id="screen-plan" class="screen">
-  <div class="section-title">Mi plan</div>
-  <div class="section-sub" id="plan-sub">Personalizado a tu perfil</div>
-  <!-- CALCULADORA -->
-  <div class="card" style="border-color:var(--acc);">
-    <div class="card-title" style="color:var(--acc2);margin-bottom:9px;">Tu perfil calculado</div>
-    <div id="plan-calc"></div>
-  </div>
-  <div id="plan-days"></div>
-  <!-- ALIMENTOS -->
-  <div class="card">
-    <div class="card-title" style="margin-bottom:8px;">Alimentos clave</div>
-    <div id="plan-foods"></div>
-  </div>
-  <!-- SUPLEMENTACION -->
-  <div class="card">
-    <div class="card-title" style="margin-bottom:9px;">Suplementación</div>
-    <div id="plan-supls"></div>
-  </div>
-  <!-- HIDRATACION -->
-  <div class="card">
-    <div class="card-title" style="margin-bottom:9px;">💧 Protocolo de hidratación</div>
-    <div id="plan-hydration"></div>
-  </div>
-</div>
-
-<!-- INFO -->
-<div id="screen-info" class="screen">
-  <div class="section-title">Metodología</div>
-  <div class="section-sub">Evidencia científica 2024-2025</div>
-  <div class="card">
-    <div class="card-title" style="margin-bottom:9px;">Principios clave</div>
-    <div class="tip-block ok"><div class="tip-t">✅ Fuerza progresiva + proteína alta = recomposición</div><div class="tip-b">La señal anabólica viene del entrenamiento. El déficit calórico moderado (~500 kcal) permite usar grasa sin perder músculo si la proteína está entre 1.8-2.2g/kg. Sin fuerza no hay señal.</div></div>
-    <div class="tip-block ok"><div class="tip-t">✅ Frecuencia 2x/semana por grupo muscular</div><div class="tip-b">Schoenfeld 2016: frecuencia doble supera a la simple para síntesis proteica muscular en intermedios. El plan trabaja cada grupo 2x/semana.</div></div>
-    <div class="tip-block ok"><div class="tip-t">✅ Rango 6-12 reps = óptimo hipertrofia</div><div class="tip-b">Genera el mayor estrés metabólico + tensión mecánica simultáneamente. Accesorios en 12-20 para más volumen con menos fatiga central.</div></div>
-    <div class="tip-block warn"><div class="tip-t">⚠️ HIIT solo en días sin fuerza</div><div class="tip-b">Revisión 2023-2024: HIIT + fuerza el mismo día interfiere en hipertrofia. El cardio de baja intensidad (LISS, 110-145 ppm) no compite con las adaptaciones de fuerza.</div></div>
-    <div class="tip-block warn"><div class="tip-t">⚠️ Superseries solo en accesorios</div><div class="tip-b">Curl+tríceps en superserie ahorra 37% del tiempo sin comprometer hipertrofia. En compuestos principales (sentadilla, hip thrust) mantener 2-3 min de descanso.</div></div>
-  </div>
-  <div class="card">
-    <div class="card-title" style="margin-bottom:9px;">Fatiga muscular (seguimiento semanal)</div>
-    <div id="fatiga-grid"></div>
-  </div>
-  <div class="card">
-    <div class="card-title" style="margin-bottom:9px;">Recetas del plan de Karol</div>
-    <div id="recetas-list"></div>
-  </div>
-</div>
-
-</div><!-- /content -->
-
-<!-- BOTTOM NAV -->
-<nav class="bnav">
-  <button class="bn on" data-s="home" id="bn-home"><span class="bn-ico">🏠</span><span>Inicio</span></button>
-  <button class="bn" data-s="sesion" id="bn-sesion"><span class="bn-ico">➕</span><span>Sesión</span></button>
-  <button class="bn" data-s="historial" id="bn-historial"><span class="bn-ico">📋</span><span>Historial</span></button>
-  <button class="bn" data-s="medidas" id="bn-medidas"><span class="bn-ico">📏</span><span>Medidas</span></button>
-  <button class="bn" data-s="plan" id="bn-plan"><span class="bn-ico">📅</span><span>Plan</span></button>
-  <button class="bn" data-s="info" id="bn-info"><span class="bn-ico">🔬</span><span>Info</span></button>
-</nav>
-
-<!-- MODAL EJERCICIO -->
-<div class="modal-ov" id="modal-ex">
-  <div class="modal">
-    <div class="modal-hnd"></div>
-    <div class="modal-title">Añadir ejercicio</div>
-    <div class="fg"><label>Ejercicio</label>
-      <select id="ex-sel">
-        <option value="">— Elige —</option>
-        <optgroup label="CUÁDRICEPS">
-          <option data-s="4" data-r="8">Hack profunda</option>
-          <option data-s="3" data-r="8">Hack con goma</option>
-          <option data-s="4" data-r="8">Prensa convergente</option>
-          <option data-s="4" data-r="10">Prensa 90°</option>
-          <option data-s="4" data-r="10">Sentadilla multipower</option>
-          <option data-s="4" data-r="10">Sentadilla goblet</option>
-          <option data-s="3" data-r="10">Zancada atrás mancuernas</option>
-          <option data-s="3" data-r="10">Zancada búlgara</option>
-          <option data-s="3" data-r="12">Extensión cuádriceps máquina</option>
-        </optgroup>
-        <optgroup label="GLÚTEO / FEMORAL">
-          <option data-s="4" data-r="12">Hip thrust barra</option>
-          <option data-s="4" data-r="12">Hip thrust máquina</option>
-          <option data-s="3" data-r="12">Puente de glúteo</option>
-          <option data-s="4" data-r="10">RDL (Peso muerto rumano) mancuernas</option>
-          <option data-s="4" data-r="10">RDL barra</option>
-          <option data-s="3" data-r="12">Curl femoral tumbado máquina</option>
-          <option data-s="3" data-r="12">Curl femoral sentado máquina</option>
-          <option data-s="3" data-r="20">Abducción glúteo máquina</option>
-          <option data-s="3" data-r="15">Patada glúteo en máquina</option>
-          <option data-s="3" data-r="15">Cable pull through</option>
-          <option data-s="4" data-r="15">Gemelo de pie máquina</option>
-        </optgroup>
-        <optgroup label="PECHO (PUSH)">
-          <option data-s="4" data-r="10">Press inclinado 45° mancuernas</option>
-          <option data-s="4" data-r="10">Press inclinado 30° mancuernas</option>
-          <option data-s="4" data-r="10">Press inclinado máquina convergente</option>
-          <option data-s="4" data-r="10">Press plano mancuernas</option>
-          <option data-s="3" data-r="12">Aperturas máquina / Peck-Deck</option>
-        </optgroup>
-        <optgroup label="HOMBRO (PUSH)">
-          <option data-s="4" data-r="10">Press militar máquina</option>
-          <option data-s="4" data-r="10">Press militar mancuernas</option>
-          <option data-s="4" data-r="15">Elevaciones laterales mancuernas</option>
-          <option data-s="3" data-r="15">Elevaciones laterales desde polea baja</option>
-          <option data-s="3" data-r="15">Peck-Deck invertida (deltoides P)</option>
-          <option data-s="3" data-r="15">Face pull cuerda</option>
-        </optgroup>
-        <optgroup label="ESPALDA (PULL)">
-          <option data-s="4" data-r="10">Jalón prono agarre ancho</option>
-          <option data-s="4" data-r="12">Jalón neutro</option>
-          <option data-s="4" data-r="10">Jalón supino</option>
-          <option data-s="4" data-r="10">Remo con mancuerna 1 brazo</option>
-          <option data-s="4" data-r="10">Remo prono en máquina convergente</option>
-          <option data-s="4" data-r="10">Remo en polea baja</option>
-        </optgroup>
-        <optgroup label="BÍCEPS">
-          <option data-s="3" data-r="12">Curl de bíceps barra</option>
-          <option data-s="3" data-r="12">Curl bíceps mancuernas</option>
-          <option data-s="3" data-r="12">Curl martillo</option>
-          <option data-s="3" data-r="12">Bayesian en polea baja</option>
-          <option data-s="3" data-r="12">Curl bíceps banco Scott</option>
-        </optgroup>
-        <optgroup label="TRÍCEPS">
-          <option data-s="3" data-r="12">Extensión tríceps polea cuerda</option>
-          <option data-s="3" data-r="12">Extensión tríceps polea barra</option>
-          <option data-s="3" data-r="12">Press francés mancuernas</option>
-          <option data-s="3" data-r="12">Tríceps Katana unilateral</option>
-          <option data-s="3" data-r="10">Fondos paralelas asistido</option>
-        </optgroup>
-        <optgroup label="CORE">
-          <option data-s="3" data-r="45" data-unit="seg">Plancha frontal</option>
-          <option data-s="3" data-r="30" data-unit="seg">Plancha lateral</option>
-          <option data-s="3" data-r="12">Pallof press</option>
-          <option data-s="3" data-r="10">Dead bug</option>
-        </optgroup>
-        <optgroup label="CARDIO">
-          <option data-s="1" data-r="30" data-unit="min">Trote continuo</option>
-          <option data-s="1" data-r="20" data-unit="min">HIIT escaladora</option>
-          <option data-s="1" data-r="40" data-unit="min">Bici estática LISS</option>
-          <option data-s="1" data-r="40" data-unit="min">Elíptica LISS</option>
-        </optgroup>
-        <option value="__custom__">✏️ Ejercicio personalizado</option>
-      </select>
-    </div>
-    <div class="fg" id="cg" style="display:none;"><label>Nombre</label><input type="text" id="ex-cn" placeholder="Nombre del ejercicio…"></div>
-    <div class="fr3">
-      <div class="fg"><label>Series</label><input type="number" id="ex-s" value="3" min="1" max="10" inputmode="numeric"></div>
-      <div class="fg"><label>Reps</label><input type="number" id="ex-r" value="10" min="1" inputmode="numeric"></div>
-      <div class="fg"><label>Unidad</label><select id="ex-u"><option value="reps">reps</option><option value="seg">seg</option><option value="min">min</option></select></div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label>Peso (kg)</label><input type="number" id="ex-w" value="0" step="0.5" min="0" inputmode="decimal"></div>
-      <div class="fg"><label>RIR (reps en reserva)</label><input type="number" id="ex-rir" value="2" min="0" max="5" inputmode="numeric"></div>
-    </div>
-    <div class="fg"><label>Nota técnica</label><input type="text" id="ex-n" placeholder="Sensación, técnica, ajuste…"></div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" id="btn-cancel-ex">Cancelar</button>
-      <button class="btn btn-acc" style="flex:1;" id="btn-confirm-ex">Añadir</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL MEDIDAS -->
-<div class="modal-ov" id="modal-med">
-  <div class="modal">
-    <div class="modal-hnd"></div>
-    <div class="modal-title">Registrar medidas</div>
-    <div class="fg"><label>Fecha</label><input type="date" id="m-fecha"></div>
-    <div class="fr">
-      <div class="fg"><label>Peso (kg)</label><input type="number" id="m-peso" step="0.1" inputmode="decimal" placeholder="—"></div>
-      <div class="fg"><label>Cintura (cm)</label><input type="number" id="m-cin" step="0.5" inputmode="decimal" placeholder="—"></div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label>Cadera (cm)</label><input type="number" id="m-cad" step="0.5" inputmode="decimal" placeholder="—"></div>
-      <div class="fg"><label>Pecho (cm)</label><input type="number" id="m-pec" step="0.5" inputmode="decimal" placeholder="—"></div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label>Brazo C (cm)</label><input type="number" id="m-bra" step="0.5" inputmode="decimal" placeholder="—"></div>
-      <div class="fg"><label>Muslo (cm)</label><input type="number" id="m-mus" step="0.5" inputmode="decimal" placeholder="—"></div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label>Pantorrilla (cm)</label><input type="number" id="m-pan" step="0.5" inputmode="decimal" placeholder="—"></div>
-      <div class="fg"><label>% Grasa (si lo tienes)</label><input type="number" id="m-grasa" step="0.1" inputmode="decimal" placeholder="—"></div>
-    </div>
-    <div class="fg"><label>Notas</label><input type="text" id="m-not" placeholder="En ayunas, contexto…"></div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" id="btn-cancel-med">Cancelar</button>
-      <button class="btn btn-acc" style="flex:1;" id="btn-confirm-med">Guardar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL DETALLE SESION -->
-<div class="modal-ov" id="modal-det">
-  <div class="modal" style="max-width:540px;">
-    <div class="modal-hnd"></div>
-    <div class="modal-title" id="det-title"></div>
-    <div id="det-content"></div>
-    <div class="modal-actions">
-      <button class="btn btn-d btn-sm" id="det-del">Eliminar</button>
-      <button class="btn btn-ghost" id="btn-close-det" style="flex:1;">Cerrar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL PERFIL -->
-<div class="modal-ov" id="modal-perfil">
-  <div class="modal">
-    <div class="modal-hnd"></div>
-    <div class="modal-title" id="perfil-title">Editar perfil</div>
-    <div class="fg"><label>Nombre</label><input type="text" id="p-nombre" placeholder="Nombre"></div>
-    <div class="fr">
-      <div class="fg"><label>Edad</label><input type="number" id="p-edad" inputmode="numeric" placeholder="38"></div>
-      <div class="fg"><label>Peso actual (kg)</label><input type="number" id="p-peso" step="0.1" inputmode="decimal" placeholder="102"></div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label>Altura (cm)</label><input type="number" id="p-altura" inputmode="numeric" placeholder="178"></div>
-      <div class="fg"><label>Actividad</label>
-        <select id="p-act">
-          <option value="1.375">Ligero</option>
-          <option value="1.55">Moderado</option>
-          <option value="1.725">Alto</option>
-        </select>
-      </div>
-    </div>
-    <div class="fg"><label>Objetivo</label>
-      <select id="p-obj">
-        <option value="recomp">Recomposición</option>
-        <option value="perdida">Pérdida de grasa</option>
-        <option value="volumen">Ganancia muscular</option>
-        <option value="mantenimiento">Mantenimiento</option>
-      </select>
-    </div>
-    <div class="fg"><label>Experiencia</label>
-      <select id="p-exp">
-        <option value="0-3">0-3 meses</option>
-        <option value="4-12">4-12 meses</option>
-        <option value="12+">+12 meses</option>
-      </select>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" id="btn-cancel-perfil">Cancelar</button>
-      <button class="btn btn-acc" style="flex:1;" id="btn-save-perfil">Guardar perfil</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- MODAL GUÍA EJERCICIO -->
-<div class="modal-ov" id="modal-guia">
-  <div class="modal" style="max-width:600px;padding-bottom:30px;">
-    <div class="modal-hnd"></div>
-    <div id="guia-header" style="display:flex;gap:12px;margin-bottom:14px;align-items:flex-start;">
-      <img id="guia-img" src="" alt="" style="width:120px;height:90px;object-fit:cover;border-radius:8px;border:1px solid var(--border2);flex-shrink:0;background:var(--bg3);" onerror="this.style.display='none'">
-      <div>
-        <div id="guia-nombre" style="font-size:18px;font-weight:800;margin-bottom:4px;"></div>
-        <div id="guia-musculo" style="font-size:12px;color:var(--acc2);margin-bottom:4px;"></div>
-        <div id="guia-maquina-tag" style="font-size:12px;color:var(--amber);background:var(--ab);padding:3px 8px;border-radius:6px;display:inline-block;"></div>
-      </div>
-    </div>
-    <!-- AI Guide button -->
-    <button class="btn" id="btn-ai-guia" style="width:100%;margin-bottom:12px;gap:8px;background:var(--accb);border-color:var(--acc);color:var(--acc2);">
-      <span>✨</span> Generar guía detallada con IA
-    </button>
-    <div id="ai-guia-result" style="display:none;"></div>
-    <div id="guia-tabs" style="display:flex;gap:6px;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px;">
-      <button class="guia-tab active" data-tab="ejecucion">Ejecución</button>
-      <button class="guia-tab" data-tab="errores">Errores</button>
-      <button class="guia-tab" data-tab="maquina">Máquina</button>
-    </div>
-    <div id="guia-ejecucion" class="guia-panel">
-      <div id="guia-ejecucion-list"></div>
-    </div>
-    <div id="guia-errores" class="guia-panel" style="display:none;">
-      <div id="guia-errores-list"></div>
-    </div>
-    <div id="guia-maquina" class="guia-panel" style="display:none;">
-      <div id="guia-maquina-desc" style="font-size:13px;color:var(--t2);line-height:1.7;"></div>
-    </div>
-    <button class="btn btn-ghost" id="btn-close-guia" style="width:100%;margin-top:14px;">Cerrar</button>
-  </div>
-</div>
-
-<!-- MODAL FICHA USUARIO -->
-<div class="modal-ov" id="modal-ficha">
-  <div class="modal">
-    <div class="modal-hnd"></div>
-    <div class="modal-title" id="ficha-title">Mi ficha</div>
-    <div id="ficha-avatar" style="width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 16px;"></div>
-    <div class="fr">
-      <div class="fg"><label>Nombre</label><input type="text" id="f-nombre" placeholder="Nombre"></div>
-      <div class="fg"><label>Apellidos</label><input type="text" id="f-apellidos" placeholder="Apellidos"></div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label>Fecha nacimiento</label><input type="date" id="f-fnac"></div>
-      <div class="fg"><label>Sexo</label><select id="f-sexo"><option value="M">Masculino</option><option value="F">Femenino</option></select></div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label>Peso (kg)</label><input type="number" id="f-peso" step="0.1" inputmode="decimal"></div>
-      <div class="fg"><label>Altura (cm)</label><input type="number" id="f-altura" inputmode="numeric"></div>
-    </div>
-    <div class="fg"><label>Objetivo principal</label>
-      <select id="f-objetivo">
-        <option value="recomp">Recomposición corporal</option>
-        <option value="perdida">Pérdida de grasa</option>
-        <option value="volumen">Ganancia muscular</option>
-        <option value="mantenimiento">Mantenimiento</option>
-      </select>
-    </div>
-    <div class="fr">
-      <div class="fg"><label>Nivel actividad</label>
-        <select id="f-actividad">
-          <option value="1.375">Ligero (1-2 días)</option>
-          <option value="1.55">Moderado (3-5 días)</option>
-          <option value="1.725">Alto (6-7 días)</option>
-        </select>
-      </div>
-      <div class="fg"><label>Experiencia gym</label>
-        <select id="f-exp">
-          <option value="0-3">0-3 meses</option>
-          <option value="4-12">4-12 meses</option>
-          <option value="12+">+12 meses</option>
-        </select>
-      </div>
-    </div>
-    <div class="fg"><label>Patologías / lesiones (opcional)</label><input type="text" id="f-lesiones" placeholder="Ej: lumbalgia crónica, rodilla derecha..."></div>
-    <div class="fg"><label>Notas del entrenador (opcional)</label><textarea id="f-notas-ent" rows="2" placeholder="Indicaciones especiales..."></textarea></div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" id="btn-cancel-ficha">Cancelar</button>
-      <button class="btn btn-acc" style="flex:1;" id="btn-save-ficha">Guardar ficha</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script>
-// Base de datos de ejercicios con imágenes libres de derechos (Wikimedia Commons / dominio público)
-var EJERCICIOS_DB = {
-  // CUÁDRICEPS
-  "Hack profunda": {
-    musculo: "Cuádriceps", maquina: "Hack squat",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Squat_rack.jpg/320px-Squat_rack.jpg",
-    ejecucion: ["Coloca los hombros bajo los acolchados de la máquina","Pies separados a la anchura de caderas, ligeramente en V","Baja lentamente hasta que los muslos queden paralelos o más abajo al suelo","Rodillas siguen la dirección de los pies, no colapsan hacia dentro","Empuja desde los talones al subir, no desde las puntas","Isométrico: mantén 1 seg abajo antes de subir"],
-    errores: ["Rodillas que se cierran al subir","No bajar al menos a 90°","Despegar los talones","Bloquear las rodillas arriba"],
-    maquina_desc: "Hack squat: plataforma inclinada con respaldo y acolchados de hombro. Los pies van en la plataforma inferior."
-  },
-  "Prensa convergente": {
-    musculo: "Cuádriceps, Glúteo", maquina: "Prensa de piernas convergente",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Leg_press.jpg/320px-Leg_press.jpg",
-    ejecucion: ["Siéntate con la espalda pegada al respaldo","Pies a la anchura de hombros en la plataforma","Baja controladamente hasta ~90° de rodilla","Empuja con toda la planta del pie","No bloquees las rodillas al extender completamente","Respira: inhala bajando, exhala subiendo"],
-    errores: ["Despegar la zona lumbar del respaldo","Bloquear rodillas arriba","Pies demasiado juntos (más cuádriceps) o demasiado separados y altos (más glúteo)"],
-    maquina_desc: "Prensa convergente: asiento reclinado, plataforma móvil inclinada. Ajusta el respaldo para que las rodillas formen ~90°."
-  },
-  "Sentadilla multipower": {
-    musculo: "Cuádriceps, Glúteo, Core", maquina: "Multipower / Smith Machine",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Squats_-_FreeWeights.jpg/320px-Squats_-_FreeWeights.jpg",
-    ejecucion: ["Barra apoyada en trapecios, no en cuello","Pies ligeramente delante de la barra en multipower","Pies separados a la anchura de hombros o un poco más","Baja con las caderas hacia atrás y abajo","Rodillas en línea con los pies","Profundidad: muslos paralelos al suelo mínimo"],
-    errores: ["Barra demasiado alta en el cuello","Rodillas adelantadas más que los pies","Espalda redondeada","No bajar suficiente"],
-    maquina_desc: "Multipower/Smith Machine: barra guiada en raíles verticales. Ajusta los topes de seguridad antes de empezar."
-  },
-  "Extensión cuádriceps máquina": {
-    musculo: "Cuádriceps (aislamiento)", maquina: "Máquina de extensión de pierna",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Leg_extension_machine.jpg/320px-Leg_extension_machine.jpg",
-    ejecucion: ["Siéntate con el respaldo recto y las rodillas justo en el borde del asiento","El rodillo de espuma debe quedar sobre el empeine, no en la tibia","Extiende las piernas completamente, aprieta el cuádriceps arriba","Pausa 1 segundo arriba, baja lento (2-3 seg)","No uses impulso, movimiento controlado"],
-    errores: ["Rodillo en posición incorrecta (daña la rodilla)","Impulso para subir","No llegar a la extensión completa"],
-    maquina_desc: "Máquina de extensión: asiento regulable, rodillo acolchado sobre el empeine. Ajusta el asiento para que la rodilla quede al nivel del eje de rotación."
-  },
-  "Zancada atrás mancuernas": {
-    musculo: "Cuádriceps, Glúteo", maquina: "Mancuernas (espacio libre)",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Lunge_exercise.jpg/320px-Lunge_exercise.jpg",
-    ejecucion: ["De pie, mancuernas en cada mano","Da un paso largo hacia atrás con una pierna","La rodilla trasera baja casi al suelo (5cm)","La rodilla delantera no pasa la punta del pie","Torso erguido durante todo el movimiento","Empuja desde el talón delantero para volver"],
-    errores: ["Rodilla delantera que colapsa hacia dentro","Inclinar el torso hacia adelante","Paso demasiado corto"],
-    maquina_desc: "Ejercicio de peso libre. Necesitas suficiente espacio detrás. Puedes hacerlo también en multipower para mayor estabilidad."
-  },
-  "Zancada búlgara": {
-    musculo: "Cuádriceps, Glúteo", maquina: "Banco + Mancuernas",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Lunge_exercise.jpg/320px-Lunge_exercise.jpg",
-    ejecucion: ["Pie trasero apoyado en el banco (empeine hacia abajo)","Pie delantero separado del banco ~1 metro","Baja la cadera verticalmente, rodilla trasera al suelo","Rodilla delantera no pasa la punta del pie","Empuja desde el talón del pie delantero","Más difícil que la zancada normal: más estabilidad y rango de movimiento"],
-    errores: ["Pie delantero muy cerca del banco","Perder el equilibrio","Torso demasiado inclinado hacia adelante"],
-    maquina_desc: "Necesitas un banco o cajón a la altura de la rodilla para apoyar el pie trasero."
-  },
-  // GLÚTEO / FEMORAL
-  "Hip thrust barra": {
-    musculo: "Glúteo mayor, Isquios", maquina: "Banco plano + Barra olímpica",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Hip_thrust_exercise.jpg/320px-Hip_thrust_exercise.jpg",
-    ejecucion: ["Espalda apoyada en el banco (altura de omoplatos)","Barra sobre las caderas con acolchado protector","Pies apoyados planos a la anchura de caderas","Empuja las caderas hacia arriba hasta quedar en línea recta hombros-caderas-rodillas","Aprieta el glúteo 1 segundo arriba (isométrico)","Barbilla al pecho durante el movimiento","Baja controladamente sin tocar el suelo"],
-    errores: ["Arquear la zona lumbar arriba (hiperextensión)","No llegar a la posición alta completa","Cabeza hacia atrás (provoca hiperextensión)","Rodillas que se cierran"],
-    maquina_desc: "Usa un banco estable. Necesitas acolchado (toalla o almohadilla específica) entre la barra y las caderas. La barra suele ser de 20kg + discos."
-  },
-  "Hip thrust máquina": {
-    musculo: "Glúteo mayor, Isquios", maquina: "Máquina de Hip thrust",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Hip_thrust_exercise.jpg/320px-Hip_thrust_exercise.jpg",
-    ejecucion: ["Siéntate en la máquina con el acolchado sobre las caderas","Pies planos, separados a la anchura de caderas","Empuja las caderas hacia arriba hasta extensión completa","Isométrico de 1 segundo arriba, apretando el glúteo","Baja lentamente sin llegar al punto muerto"],
-    errores: ["Hiperextensión lumbar arriba","No apretar el glúteo en el punto más alto","Usar impulso en lugar de control muscular"],
-    maquina_desc: "Máquina de Hip thrust: más cómoda y segura que con barra. El acolchado protege las caderas automáticamente."
-  },
-  "RDL (Peso muerto rumano) mancuernas": {
-    musculo: "Isquiotibiales, Glúteo, Lumbar", maquina: "Mancuernas (peso libre)",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Romanian_deadlift.jpg/320px-Romanian_deadlift.jpg",
-    ejecucion: ["De pie, mancuernas delante de los muslos","Pies a la anchura de caderas, rodillas ligeramente flexionadas","Inclina el torso hacia adelante empujando las caderas HACIA ATRÁS (no hacia abajo)","Espalda SIEMPRE neutral, no redondeada","Baja hasta sentir tirón en los isquios (no más)","Las mancuernas bajan pegadas a las piernas","Sube empujando las caderas hacia adelante"],
-    errores: ["Doblar la espalda (el error más peligroso)","Bajar demasiado perdiendo la posición","Flexionar demasiado las rodillas (se convierte en sentadilla)","Separar las mancuernas del cuerpo"],
-    maquina_desc: "Ejercicio de peso libre. Si es tu primera vez, practica sin peso mirándote en el espejo de perfil para verificar que la espalda está recta."
-  },
-  "Curl femoral tumbado máquina": {
-    musculo: "Isquiotibiales", maquina: "Máquina de curl femoral tumbado",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Lying_leg_curl.jpg/320px-Lying_leg_curl.jpg",
-    ejecucion: ["Tumbado boca abajo, el rodillo sobre el talón (tobillo)","Las rodillas deben sobresalir ligeramente del borde","Dobla las rodillas llevando los talones hacia los glúteos","Fase excéntrica LENTA: 3-4 segundos bajando","No levantes las caderas del apoyo","Pausa 1 segundo al llegar arriba"],
-    errores: ["Levantamiento de caderas para ayudarse","Rodillo mal posicionado (encima del tendón de Aquiles)","Bajar demasiado rápido (perder el beneficio excéntrico)"],
-    maquina_desc: "Máquina de curl femoral: ajusta el rodillo para que quede sobre el tendón de Aquiles, no en la pantorrilla."
-  },
-  "Curl femoral sentado máquina": {
-    musculo: "Isquiotibiales (cabeza corta)", maquina: "Máquina de curl femoral sentado",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Lying_leg_curl.jpg/320px-Lying_leg_curl.jpg",
-    ejecucion: ["Sentado, el rodillo superior fija los muslos","El rodillo inferior bajo el talón","Dobla las rodillas hacia abajo","Mayor tensión en posición alargada (diferente al tumbado)","Baja lento (excéntrico 3 seg)"],
-    errores: ["No ajustar los rodillos correctamente","Impulso en lugar de contracción muscular"],
-    maquina_desc: "Máquina de curl femoral sentado: ajusta el asiento y ambos rodillos (superior e inferior)."
-  },
-  "Abducción glúteo máquina": {
-    musculo: "Glúteo medio", maquina: "Máquina de abducción",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Hip_abduction_machine.jpg/320px-Hip_abduction_machine.jpg",
-    ejecucion: ["Sentada en la máquina, almohadillas en la cara exterior de las rodillas","Abre las piernas hacia los lados (abducción)","Movimiento controlado, sin impulso","Pausa 1 segundo en apertura máxima","Regresa lentamente al centro sin que las almohadillas choquen"],
-    errores: ["Impulso y rebote en lugar de contracción","No llevar a apertura completa","Levantar las caderas del asiento"],
-    maquina_desc: "Máquina de abducción: ajusta la altura de las almohadillas para que queden en la parte exterior de las rodillas."
-  },
-  "Patada glúteo en máquina": {
-    musculo: "Glúteo mayor", maquina: "Máquina de patada de glúteo",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Cable_kickback.jpg/320px-Cable_kickback.jpg",
-    ejecucion: ["Apoya el pecho en el acolchado, agarra las asas","El rodillo detrás del talón de la pierna de trabajo","Extiende la pierna hacia atrás y arriba hasta alineación con el torso","Aprieta el glúteo en la posición alta","Baja lentamente sin que el peso toque el stack"],
-    errores: ["Hiperextensión lumbar al subir la pierna demasiado","Usar impulso o balanceo","No contraer el glúteo en la posición alta"],
-    maquina_desc: "Máquina de patada de glúteo o polea baja con tobillera. Ajusta el rodillo para que quede justo encima del talón."
-  },
-  "Gemelo de pie máquina": {
-    musculo: "Gastrocnemio, Sóleo", maquina: "Máquina de gemelo de pie",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Calf_raise_machine.jpg/320px-Calf_raise_machine.jpg",
-    ejecucion: ["Hombros bajo los acolchados","Pies con la parte anterior (metatarso) en la plataforma, talones colgando","Sube de puntillas hasta máxima contracción","Pausa 1 segundo arriba apretando el gemelo","Baja lentamente más abajo del nivel inicial (estiramiento completo)","Rango COMPLETO es clave: si no bajas no hay beneficio"],
-    errores: ["Rango incompleto (los pies no bajan por debajo del nivel del talón)","No pausa arriba","Impulso de rodillas"],
-    maquina_desc: "Máquina de gemelo de pie: ajusta los acolchados de hombro para que queden cómodos sin comprimir."
-  },
-  // PUSH - PECHO
-  "Press inclinado 45° mancuernas": {
-    musculo: "Pecho superior, Deltoides anterior, Tríceps", maquina: "Banco inclinado + Mancuernas",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Incline_bench_press.jpg/320px-Incline_bench_press.jpg",
-    ejecucion: ["Banco a 30-45°. A más ángulo, más deltoides anterior","Mancuernas a la altura del pecho, codos a 45° del torso (no a 90°)","Pies planos en el suelo, espalda pegada al banco","Empuja hacia arriba y ligeramente hacia el centro","Baja controladamente: 2-3 segundos","No bloquees codos arriba completamente"],
-    errores: ["Codos a 90° del torso (lesiona el hombro)","Rebotar en la parte baja","Levantar las caderas del banco","Espalda excesivamente arqueada"],
-    maquina_desc: "Banco inclinado regulable. Ajusta el ángulo entre 30-45°. Si el banco es fijo, busca el que esté a ese ángulo en tu gimnasio."
-  },
-  "Press inclinado máquina convergente": {
-    musculo: "Pecho superior, Deltoides anterior", maquina: "Máquina de press convergente",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Incline_bench_press.jpg/320px-Incline_bench_press.jpg",
-    ejecucion: ["Asiento ajustado para que los mangos queden a la altura del pecho superior","Agarra los mangos, codos ligeramente por debajo de los hombros","Empuja hacia adelante y arriba (trayectoria convergente)","Pausa 1 seg extendido sin bloquear codos","Vuelve controladamente sintiendo el pectoral"],
-    errores: ["Asiento demasiado bajo (trabaja deltoides en exceso)","Asiento demasiado alto (pierde rango pectoral)","Usar impulso del torso"],
-    maquina_desc: "Máquina de press convergente inclinada: ajusta la altura del asiento hasta que los mangos estén a la altura del pecho bajo los clavículas."
-  },
-  "Aperturas máquina / Peck-Deck": {
-    musculo: "Pecho (aislamiento), Estiramiento pectoral", maquina: "Peck-Deck / Máquina de aperturas",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Chest_fly_machine.jpg/320px-Chest_fly_machine.jpg",
-    ejecucion: ["Ajusta el asiento para que los brazos estén a la altura de los hombros","Agarra los mangos o apoya los antebrazos en los acolchados","Cierra los brazos hacia el centro como si abrazaras un árbol grande","Pausa 1 segundo en el centro, aprieta el pectoral","Abre lentamente sintiendo el estiramiento pectoral","No vayas tan atrás que duela el hombro"],
-    errores: ["Rango demasiado amplio detrás (lesiona el hombro anterior)","Impulso en lugar de contracción","Asiento mal ajustado"],
-    maquina_desc: "Peck-Deck: ajusta los brazos de la máquina para que el estiramiento sea cómodo. Si duele el hombro, reduce el rango de apertura."
-  },
-  // PUSH - HOMBRO
-  "Press militar máquina": {
-    musculo: "Deltoides medial y anterior, Tríceps", maquina: "Máquina de press de hombros",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Shoulder_press_machine.jpg/320px-Shoulder_press_machine.jpg",
-    ejecucion: ["Ajusta el asiento para que los mangos estén a la altura de los hombros","Espalda pegada al respaldo durante TODO el movimiento","Empuja hacia arriba sin bloquear los codos completamente","Baja controladamente hasta la altura de los hombros","Sin arquear la zona lumbar","Respira: exhala al subir"],
-    errores: ["Arquear la zona lumbar (carga en la columna)","Bajar demasiado (por debajo de los hombros)","Bloquear los codos arriba con impulso"],
-    maquina_desc: "Máquina de press de hombros: ajusta el asiento para que los mangos queden a la altura de las orejas cuando están abajo."
-  },
-  "Elevaciones laterales mancuernas": {
-    musculo: "Deltoides medial (músculo redondo del hombro)", maquina: "Mancuernas (peso libre)",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Lateral_raise.jpg/320px-Lateral_raise.jpg",
-    ejecucion: ["De pie o sentado, mancuernas a los lados","Codo ligeramente flexionado durante todo el movimiento","Sube los brazos lateralmente hasta la altura de los hombros (90°)","El meñique ligeramente más alto que el pulgar (como verter agua)","LENTO en la bajada: 3-4 segundos (excéntrico es clave)","Sin balanceo de torso"],
-    errores: ["Subir por encima de 90° (deltoides deja de trabajar, trabaja trapecio)","Codo completamente extendido (lesiona el codo)","Impulso con el torso","Bajar demasiado rápido"],
-    maquina_desc: "No necesitas máquina. Con 5-10 kg ya es exigente para principiantes. El deltoides medial es pequeño: no exijas demasiado peso."
-  },
-  "Elevaciones laterales desde polea baja": {
-    musculo: "Deltoides medial (tensión constante)", maquina: "Polea baja / Cable",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Lateral_raise.jpg/320px-Lateral_raise.jpg",
-    ejecucion: ["La polea baja va al lado opuesto del brazo que trabaja","Agarra el cable cruzándolo por delante del cuerpo","Sube el brazo lateralmente hasta la altura del hombro","La polea da tensión constante a diferencia de la mancuerna","Ideal combinar: mancuerna + polea en la misma sesión"],
-    errores: ["Tirar con el torso","Subir demasiado alto","Soltar la tensión abajo"],
-    maquina_desc: "Polea con guía de altura. Ajusta la polea a la posición más baja. Usa la tobillera o el mango pequeño para agarrar."
-  },
-  "Face pull cuerda": {
-    musculo: "Deltoides posterior, Manguito rotador, Romboides", maquina: "Polea alta con accesorio de cuerda",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Face_pull_cable.jpg/320px-Face_pull_cable.jpg",
-    ejecucion: ["Polea a la altura de la cara o ligeramente por encima","Agarra la cuerda con los pulgares hacia ti","Tira hacia la cara separando los extremos de la cuerda al final","Los codos suben y se abren hacia los lados","Pausa 1 segundo, vuelve controladamente","Ejercicio CLAVE para salud del hombro y postura"],
-    errores: ["Polea demasiado baja (se convierte en remo)","No separar los extremos de la cuerda al final","Tirar con el cuerpo, no con el deltoides posterior"],
-    maquina_desc: "Polea alta con accesorio de cuerda (rope). Imprescindible en TODOS los días de torso para compensar el trabajo anterior del hombro."
-  },
-  "Peck-Deck invertida (deltoides P)": {
-    musculo: "Deltoides posterior, Romboides", maquina: "Peck-Deck en posición invertida",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Chest_fly_machine.jpg/320px-Chest_fly_machine.jpg",
-    ejecucion: ["Siéntate en el Peck-Deck mirando al respaldo (invertido)","Ajusta los mangos a la altura de los hombros cuando el brazo está extendido","Abre los brazos hacia atrás como si volaras","Pausa 1 segundo en la apertura máxima","Vuelve lentamente sin que los pesos toquen el stack"],
-    errores: ["Tirar con el trapecio elevando los hombros","Impulso hacia atrás","Rango demasiado pequeño"],
-    maquina_desc: "Es la misma máquina Peck-Deck pero sentado al revés, mirando el respaldo. Muchos gimnasios tienen la máquina de 'cruces al revés' de forma independiente."
-  },
-  // PULL - ESPALDA
-  "Jalón prono agarre ancho": {
-    musculo: "Dorsal ancho, Redondo mayor, Bíceps", maquina: "Polea alta / Máquina de jalón",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Lat_pulldown.jpg/320px-Lat_pulldown.jpg",
-    ejecucion: ["Siéntate, fija los muslos bajo los acolchados","Agarra la barra más ancha que los hombros (pronado: palmas hacia afuera)","Tira hacia la clavícula, no al cuello","PRIMERO retrae las escápulas (junta los omóplatos), LUEGO dobla los codos","Cuerpo ligeramente inclinado hacia atrás (10-15°)","Vuelve lentamente con brazos casi extendidos"],
-    errores: ["Tirar al cuello o más abajo del pecho","Usar impulso del torso","No retraer escápulas antes de tirar","Manos demasiado abiertas (pierde fuerza)"],
-    maquina_desc: "Polea alta con barra larga. La barra suele tener marcas para indicar el agarre ancho."
-  },
-  "Jalón neutro": {
-    musculo: "Dorsal ancho, Bíceps (mayor activación)", maquina: "Polea alta con accesorio neutro en V",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Lat_pulldown.jpg/320px-Lat_pulldown.jpg",
-    ejecucion: ["Usa el accesorio en V (mangos paralelos) o doble cuerda","Palmas mirándose entre sí (agarre neutro)","Tira hacia el pecho/esternón","Codos van hacia abajo y atrás siguiendo el cuerpo","Mayor activación de bíceps que el agarre prono","Mismo patrón: escápulas → codos"],
-    errores: ["Tirar demasiado abajo del esternón","Inclinar excesivamente el torso hacia atrás"],
-    maquina_desc: "Necesitas el accesorio en V de doble mango. Si no hay, puedes usar dos mangas individuales."
-  },
-  "Jalón supino": {
-    musculo: "Dorsal, Bíceps (máxima activación)", maquina: "Polea alta con barra",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Lat_pulldown.jpg/320px-Lat_pulldown.jpg",
-    ejecucion: ["Misma barra que el jalón prono pero palmas hacia ti (supino)","Agarre a la anchura de hombros","Tira hacia el pecho, codos cerca del cuerpo","Mayor activación de bíceps que los otros jalones","Útil para alternar en el mismo mesociclo"],
-    errores: ["Agarre demasiado ancho","Tirar demasiado abajo"],
-    maquina_desc: "Misma polea alta. Solo cambia el agarre: palmas mirando hacia ti en lugar de hacia afuera."
-  },
-  "Remo máquina convergente": {
-    musculo: "Romboides, Trapecio medio, Dorsal", maquina: "Máquina de remo convergente",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Cable_row.jpg/320px-Cable_row.jpg",
-    ejecucion: ["Pecho apoyado en el acolchado (si lo tiene)","Agarra los mangos con los brazos casi extendidos","Tira llevando los codos hacia atrás y los hombros hacia atrás","Aprieta las escápulas en el punto final (junta omóplatos)","Pausa 1 segundo al final, vuelve lento"],
-    errores: ["Usar impulso del torso inclinándolo hacia atrás","No retraer completamente las escápulas","Volver demasiado rápido"],
-    maquina_desc: "Máquina de remo convergente: el pecho descansa en un acolchado. Los mangos pueden ser neutros o pronados según el modelo."
-  },
-  "Remo con mancuerna 1 brazo": {
-    musculo: "Dorsal ancho, Romboides, Bíceps", maquina: "Banco plano + 1 Mancuerna",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/One-arm_dumbbell_row.jpg/320px-One-arm_dumbbell_row.jpg",
-    ejecucion: ["Apoya la rodilla y la mano del lado contrario en el banco","La otra pierna en el suelo, torso paralelo al banco","Mancuerna en la mano libre, brazo casi extendido","Tira del codo hacia arriba y atrás (hacia la cadera)","La muñeca sigue al codo: no gires la mano hacia fuera","Pausa arriba, baja lento"],
-    errores: ["Rotar el torso para ayudarse (engaño)","Tirar con el bíceps en lugar del dorsal","Codo que se abre hacia el lado"],
-    maquina_desc: "Solo necesitas un banco y una mancuerna. Uno de los mejores ejercicios de espalda para principiantes."
-  },
-  "Remo en polea baja": {
-    musculo: "Romboides, Trapecio medio, Dorsal", maquina: "Polea baja con asiento",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Cable_row.jpg/320px-Cable_row.jpg",
-    ejecucion: ["Siéntate, pies en los apoyos, rodillas ligeramente flexionadas","Coge el triángulo o la cuerda con los brazos extendidos","Mantén el torso erguido (no te inclines hacia atrás)","Tira del accesorio hacia el abdomen/ombligo","Codos pasan junto al cuerpo y van hacia atrás","Aprieta omóplatos, pausa, vuelve lento"],
-    errores: ["Inclinar el torso hacia atrás para 'ayudarse'","Encorvar la espalda","Dar un tirón inicial con las piernas"],
-    maquina_desc: "Polea baja con apoyabrazos. Usa el triángulo neutro (V) o la cuerda. La plataforma tiene apoyapiés a los lados."
-  },
-  // BÍCEPS
-  "Curl de bíceps barra": {
-    musculo: "Bíceps braquial, Braquial", maquina: "Barra Z (EZ) o barra recta",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Barbell_curl.jpg/320px-Barbell_curl.jpg",
-    ejecucion: ["De pie, agarre supino (palmas arriba) a la anchura de hombros","Codos fijos a los costados durante todo el movimiento","Dobla los codos llevando la barra hacia los hombros","Pausa 1 segundo arriba apretando el bíceps","Baja lentamente (3 segundos)","No balancees el torso"],
-    errores: ["Codos que se adelantan (pierde tensión en bíceps)","Balanceo de torso para subir","No bajar completamente (pierde rango)","Agarre demasiado ancho"],
-    maquina_desc: "Barra EZ (en Z): reduce la tensión en las muñecas. La barra recta activa ligeramente más el bíceps pero puede molestar las muñecas."
-  },
-  "Curl bíceps mancuernas": {
-    musculo: "Bíceps braquial", maquina: "Mancuernas",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Barbell_curl.jpg/320px-Barbell_curl.jpg",
-    ejecucion: ["De pie o sentado, mancuernas en cada mano","Puedes alternar (un brazo a la vez) o simultáneo","Codos fijos, sube girando la muñeca hacia dentro (supinación) al subir","Pausa apretando el bíceps, baja lento","Sentado en banco inclinado 45°: mayor estiramiento del bíceps"],
-    errores: ["No supinar la muñeca al subir","Codos que se adelantan","Impulso con el cuerpo"],
-    maquina_desc: "Solo mancuernas. Sentado en banco inclinado a 45° maximiza el rango de movimiento y la activación del bíceps."
-  },
-  "Curl martillo": {
-    musculo: "Braquial, Braquiorradial, Bíceps", maquina: "Mancuernas",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Barbell_curl.jpg/320px-Barbell_curl.jpg",
-    ejecucion: ["Agarre neutro: pulgar arriba (como sostener un martillo)","Codos fijos a los costados","Sube alternando o simultáneo","No supines la muñeca (se mantiene neutro)","Trabaja más el braquial y el antebrazo que el bíceps"],
-    errores: ["Girar la muñeca (lo convierte en curl normal)","Impulso del torso"],
-    maquina_desc: "Solo mancuernas. El agarre neutro reduce la tensión en las muñecas comparado con el curl supino."
-  },
-  "Bayesian en polea baja": {
-    musculo: "Bíceps (pico, larga cabeza)", maquina: "Polea baja",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Barbell_curl.jpg/320px-Barbell_curl.jpg",
-    ejecucion: ["De pie de espaldas a la polea baja","Agarra el mango, da un paso adelante para crear tensión","El brazo queda ligeramente detrás del cuerpo (estira más la larga cabeza)","Dobla el codo llevando la mano hacia el hombro","Pausa, vuelve controladamente"],
-    errores: ["Moverse demasiado lejos de la polea (pierde recorrido)","Girar el torso al subir"],
-    maquina_desc: "Polea baja con mango individual. Excelente para el pico del bíceps porque trabaja la larga cabeza en posición estirada."
-  },
-  "Curl bíceps banco Scott": {
-    musculo: "Bíceps (aislamiento máximo)", maquina: "Banco Scott + Barra EZ",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Barbell_curl.jpg/320px-Barbell_curl.jpg",
-    ejecucion: ["Siéntate en el banco Scott, tríceps apoyados en el acolchado inclinado","Los codos NO se mueven del acolchado","Sube la barra EZ hasta casi tocar los hombros","Baja completamente hasta extensión casi completa","El banco fija los codos: aislamiento puro de bíceps"],
-    errores: ["Separar los codos del acolchado al subir","No bajar completamente","Peso excesivo que impide el rango completo"],
-    maquina_desc: "Banco Scott: banco con apoyo inclinado para los tríceps que fija los codos. Impide el impulso del torso."
-  },
-  // TRÍCEPS
-  "Extensión tríceps polea cuerda": {
-    musculo: "Tríceps (3 cabezas)", maquina: "Polea alta con cuerda",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Tricep_pushdown.jpg/320px-Tricep_pushdown.jpg",
-    ejecucion: ["Polea alta, accesorio de cuerda","De pie frente a la polea, torso ligeramente inclinado adelante","Codos fijos a los costados (no se mueven)","Empuja hacia abajo hasta extensión completa separando los extremos de la cuerda","Aprieta el tríceps 1 segundo abajo","Vuelve lentamente hasta que los antebrazos queden paralelos al suelo"],
-    errores: ["Codos que se abren o se adelantan","No extender completamente abajo","Torso que se inclina para ayudar"],
-    maquina_desc: "Polea alta con accesorio de cuerda. También puede hacerse con barra recta o barra EZ en la misma polea."
-  },
-  "Press francés mancuernas": {
-    musculo: "Tríceps (cabeza larga)", maquina: "Banco plano + Mancuernas",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Tricep_pushdown.jpg/320px-Tricep_pushdown.jpg",
-    ejecucion: ["Tumbado en banco, mancuernas sobre el pecho con brazos extendidos","Dobla los codos llevando las mancuernas hacia los lados de la cabeza","Los codos apuntan hacia el techo y NO se abren","Extiende de nuevo hasta posición inicial","Trabaja la cabeza larga del tríceps en posición estirada"],
-    errores: ["Codos que se abren (se pierde aislamiento del tríceps)","Usar impulso del hombro","Bajar demasiado hacia la cara (riesgo)"],
-    maquina_desc: "Banco plano y mancuernas. Puedes hacerlo también con barra EZ o en polea alta tumbado."
-  },
-  "Fondos paralelas asistido": {
-    musculo: "Tríceps, Pecho inferior, Deltoides anterior", maquina: "Máquina de fondos asistidos",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Dip_machine.jpg/320px-Dip_machine.jpg",
-    ejecucion: ["Selecciona el peso de asistencia (mayor asistencia = más fácil)","Sube a la máquina, rodillas en la plataforma","Agarra las barras paralelas","Baja hasta que los brazos queden a 90°","Empuja hasta extensión completa","Cuanto más recto el torso, más tríceps. Inclinado adelante = más pecho"],
-    errores: ["No bajar suficiente","Balancear el cuerpo","Asistencia excesiva (reduce el estímulo)"],
-    maquina_desc: "Máquina de fondos asistidos: tiene una plataforma para las rodillas que te ayuda con un contrapeso. Goal: reducir la asistencia semana a semana."
-  },
-  "Tríceps Katana unilateral": {
-    musculo: "Tríceps (cabeza larga, unilateral)", maquina: "Polea alta con mango individual",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Tricep_pushdown.jpg/320px-Tricep_pushdown.jpg",
-    ejecucion: ["Polea alta, mango individual, un solo brazo","De lado o de frente a la polea","El codo se queda fijo, empuja hacia abajo y hacia el lado","El movimiento recuerda a desenvainar una espada (de ahí el nombre)","Excelente para trabajar la cabeza larga unilateralmente"],
-    errores: ["Mover el codo de su posición","Usar el torso como ayuda"],
-    maquina_desc: "Polea alta con mango individual. Ejercicio especializado para la cabeza larga del tríceps."
-  },
-  // CORE
-  "Plancha frontal": {
-    musculo: "Core, Transverso abdominal, Lumbar", maquina: "Suelo (esterilla)",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Plank_pose.jpg/320px-Plank_pose.jpg",
-    ejecucion: ["Apoya antebrazos y punta de los pies","Cuerpo en línea recta de cabeza a talones","Caderas neutras: ni arriba ni abajo","Contrae el abdomen y el glúteo durante todo el tiempo","Respiración continua (no aguantes el aliento)","Mirada al suelo, cuello neutro"],
-    errores: ["Caderas que suben (el error más común)","Caderas que caen (lesiona la lumbar)","Aguantar la respiración","Cuello en tensión mirando al frente"],
-    maquina_desc: "Solo necesitas una esterilla. Es el ejercicio de core más completo y seguro."
-  },
-  "Plancha lateral": {
-    musculo: "Oblicuos, Core lateral, Cuadrado lumbar", maquina: "Suelo (esterilla)",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Plank_pose.jpg/320px-Plank_pose.jpg",
-    ejecucion: ["Apoya el antebrazo y el pie lateral (o rodilla si es más fácil)","Cuerpo en línea recta lateral, caderas elevadas","La cadera no cae ni se levanta","Contrae el oblicuo del lado de abajo","Respiración continua"],
-    errores: ["Cadera que cae hacia el suelo","Hombro que se colapsa","Cuello en tensión"],
-    maquina_desc: "Solo esterilla. Puedes empezar con la rodilla apoyada si no tienes fuerza suficiente para la versión completa."
-  },
-  "Pallof press": {
-    musculo: "Core antirotación, Oblicuos", maquina: "Polea a la altura del pecho",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Face_pull_cable.jpg/320px-Face_pull_cable.jpg",
-    ejecucion: ["De pie perpendicular a la polea, a la altura del pecho","Agarra el mango con ambas manos frente al pecho","Extiende los brazos hacia adelante y mantén 2 segundos","Vuelve las manos al pecho","La clave: el torso NO debe rotar. Resiste la rotación","La clave: NO es empujar sino resistir la fuerza de la polea"],
-    errores: ["Rotar el torso al extender los brazos","Estar demasiado cerca de la polea (no hay tensión)","Ritmo demasiado rápido"],
-    maquina_desc: "Polea con mango en V o individual. Ajusta a la altura del ombligo. Trabaja la resistencia a la rotación del core."
-  },
-  "Dead bug": {
-    musculo: "Core profundo (transverso), Estabilización lumbar", maquina: "Suelo (esterilla)",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Plank_pose.jpg/320px-Plank_pose.jpg",
-    ejecucion: ["Tumbado boca arriba, brazos extendidos hacia el techo","Rodillas a 90°, muslos verticales (posición de mesa)","ESPALDA LUMBAR PEGADA AL SUELO en todo momento","Baja simultáneamente el brazo derecho hacia atrás y la pierna izquierda hacia el suelo","Vuelve al centro sin que la lumbar se despegue","Alterna lados. Si la lumbar se despega: para y descansa"],
-    errores: ["Lumbar que se arquea y se despega del suelo (el error principal)","Movimiento demasiado rápido","Aguantar la respiración"],
-    maquina_desc: "Solo esterilla. Puede parecer fácil pero es muy efectivo cuando se hace correctamente manteniendo la lumbar pegada al suelo."
-  },
-  // CARDIO
-  "Trote continuo": {
-    musculo: "Cardiovascular, Gemelos, Cuádriceps", maquina: "Cinta de correr",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Running_in_line.jpg/320px-Running_in_line.jpg",
-    ejecucion: ["Ritmo conversacional: puedes hablar sin ahogarte","FC objetivo: 110-145 ppm (60-75% FCmáx)","Pisada en el mediopié, no en el talón","Brazos relajados a 90°, balanceo natural","Cadencia: 160-170 pasos por minuto","Respiración nasal en la medida de lo posible"],
-    errores: ["Ritmo demasiado alto (se convierte en HIIT)","Mirar hacia abajo mientras corres","Brazos cruzados por delante del cuerpo","Pisada en el talón (mayor impacto articular)"],
-    maquina_desc: "Cinta de correr: empieza a 0 inclinación. Puedes añadir 1-2% de inclinación para simular terreno exterior. LISS = baja intensidad, estado estacionario."
-  },
-  "HIIT escaladora": {
-    musculo: "Cardiovascular, Glúteo, Cuádriceps, Isquios", maquina: "Escaladora (StairMaster)",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Stair_climbing.jpg/320px-Stair_climbing.jpg",
-    ejecucion: ["Protocolo HIIT: 30-40 seg intensidad alta + 20-30 seg recuperación","En la fase intensa: nivel 12-16","En recuperación: nivel 4-6","Postura erguida, no te cuelgues de los pasamanos","Los glúteos deben sentirse trabajando en cada escalón","Solo en días SIN entrenamiento de fuerza (miércoles)"],
-    errores: ["Colgarse de los pasamanos (elimina el trabajo de piernas)","Hacer HIIT después de sesión de fuerza","Subir escalones sin apoyar toda la planta del pie"],
-    maquina_desc: "Escaladora (StairMaster): simula subir escaleras. Excelente para cardio de alta intensidad con bajo impacto articular comparado con correr."
-  },
-  "Bici estática LISS": {
-    musculo: "Cardiovascular, Cuádriceps, Isquios", maquina: "Bicicleta estática / Spinning",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Running_in_line.jpg/320px-Running_in_line.jpg",
-    ejecucion: ["Ajusta el sillín a la altura de la cadera (rodilla ligeramente flexionada abajo)","Nivel resistencia: esfuerzo conversacional","FC objetivo: 110-145 ppm","Cadencia: 70-90 rpm","No te apoyes en el manillar: mantén el core activo","Ideal para cardio sin impacto articular"],
-    errores: ["Sillín demasiado bajo (rodillas en ángulo agudo)","Resistencia demasiado alta en LISS","Apoyarse en el manillar (reduce trabajo cardiovascular real)"],
-    maquina_desc: "Bicicleta estática o spinning. Alternativa perfecta si hay molestias en rodillas o tobillos con la cinta."
-  },
-};
-
-/* =================== DATOS BASE =================== */
-var PLAN_U1 = [
-  {dia:'Lunes',tipo:'Torso 1 — Push',color:'#6c4fff',sub:'Pecho · Hombro · Tríceps · Core',
-   nota:'No hagas HIIT al terminar. Máx. 10 min caminata inclinada suave.',
-   exs:[
-    {n:'Press inclinado 45° mancuernas',s:'3×10→4×10',p1:'18-20',p2:'22-24',p3:'26-30'},
-    {n:'Press inclinado 30° mancuernas',s:'3×10',p1:'14-16',p2:'18-20',p3:'22-26'},
-    {n:'Press militar máquina',s:'3×10→4×10',p1:'30-35',p2:'40-50',p3:'55-65'},
-    {n:'Elevaciones laterales mancuernas',s:'4×15',p1:'6-8',p2:'8-10',p3:'10-12'},
-    {n:'Aperturas máquina / Peck-Deck',s:'3×12',p1:'25-30',p2:'35-40',p3:'45-55'},
-    {n:'Extensión tríceps polea cuerda',s:'3×12',p1:'15-20',p2:'22-27',p3:'30-37'},
-    {n:'Fondos paralelas asistido',s:'3×10',p1:'Asist.30-40',p2:'Asist.20-30',p3:'Asist.10-20'},
-    {n:'Plancha frontal',s:'3×45-60s',p1:'PC 45s',p2:'PC 50s',p3:'PC 60s'},
-   ]},
-  {dia:'Martes',tipo:'Pierna 1 — Cuád/Glúteo',color:'#22c55e',sub:'Cuádriceps · Glúteo · Isquio',
-   nota:'Día clave para grasa visceral. Mayor grupo muscular = mayor EPOC.',
-   exs:[
-    {n:'Hack profunda',s:'3×8-10→4×8',p1:'40-50',p2:'60-70',p3:'75-90'},
-    {n:'Hip thrust barra',s:'4×12',p1:'40-50',p2:'60-70',p3:'80-100'},
-    {n:'Prensa convergente',s:'4×12',p1:'80-100',p2:'110-130',p3:'140-160'},
-    {n:'RDL mancuernas',s:'4×10',p1:'16-20',p2:'22-26',p3:'28-34'},
-    {n:'Zancada atrás mancuernas',s:'3×10/pierna',p1:'10-12',p2:'14-16',p3:'18-22'},
-    {n:'Curl femoral tumbado máquina',s:'3×12',p1:'25-35',p2:'35-45',p3:'45-60'},
-    {n:'Extensión cuádriceps máquina',s:'3×12',p1:'30-40',p2:'45-55',p3:'55-70'},
-    {n:'Abducción glúteo máquina',s:'3×20',p1:'30-40',p2:'45-55',p3:'55-70'},
-    {n:'Gemelo de pie máquina',s:'4×15',p1:'PC+10',p2:'PC+20-30',p3:'PC+35-50'},
-   ]},
-  {dia:'Miércoles',tipo:'Cardio / LISS',color:'#3b82f6',sub:'Cardiovascular · Movilidad',
-   nota:'ÚNICO día de cardio intenso (HIIT opcional). Resto de días: solo LISS suave post-fuerza.',
-   exs:[
-    {n:'Calentamiento caminata',s:'10 min',p1:'5-6 km/h',p2:'5-6 km/h',p3:'6 km/h'},
-    {n:'Trote / bloques LISS',s:'S1-2: bloques 3+2min',p1:'7-8 km/h',p2:'7.5-8.5',p3:'HIIT 20min'},
-    {n:'Vuelta a la calma + movilidad',s:'10-15 min',p1:'Caminata',p2:'Caminata',p3:'Estiramientos'},
-   ]},
-  {dia:'Jueves',tipo:'Torso 2 — Pull + SS',color:'#f59e0b',sub:'Espalda · Bíceps · Tríceps · Core',
-   nota:'Superseries SOLO en accesorios (curl+tríceps). Compuestos con descanso completo 2-3 min.',
-   exs:[
-    {n:'Jalón prono agarre ancho',s:'4×10',p1:'45-55',p2:'60-70',p3:'75-90'},
-    {n:'Jalón neutro',s:'4×12',p1:'40-50',p2:'55-65',p3:'70-80'},
-    {n:'Remo máquina convergente',s:'4×10',p1:'45-55',p2:'60-70',p3:'75-90'},
-    {n:'Remo mancuerna 1 brazo',s:'3×12/lado',p1:'20-22',p2:'24-28',p3:'30-36'},
-    {n:'Face pull cuerda',s:'3×15',p1:'12-15',p2:'17-20',p3:'22-27'},
-    {n:'SS: Curl bíceps barra',s:'3×12',p1:'20-25',p2:'27-32',p3:'35-42'},
-    {n:'SS: Tríceps cuerda',s:'3×12',p1:'15-20',p2:'22-27',p3:'28-35'},
-    {n:'Pallof press',s:'3×12/lado',p1:'10-15',p2:'15-20',p3:'20-27'},
-   ]},
-  {dia:'Viernes',tipo:'Pierna 2 + Full body',color:'#ef4444',sub:'Glúteo · Femoral · Full body + Finisher',
-   nota:'Pesos 10% menores por fatiga acumulada. El finisher es el estímulo metabólico clave.',
-   exs:[
-    {n:'RDL mancuernas',s:'4×10',p1:'16-18',p2:'20-24',p3:'26-30'},
-    {n:'Hip thrust máquina',s:'4×12',p1:'40-55',p2:'60-75',p3:'80-100'},
-    {n:'Press pecho máquina',s:'3×12',p1:'35-45',p2:'50-60',p3:'65-80'},
-    {n:'Remo en polea baja',s:'3×12',p1:'40-50',p2:'55-65',p3:'70-82'},
-    {n:'Abducción glúteo',s:'3×20',p1:'30-40',p2:'45-55',p3:'55-65'},
-    {n:'Press hombro mancuernas',s:'3×10',p1:'14-16',p2:'18-20',p3:'22-26'},
-    {n:'Finisher: Sentadilla goblet',s:'3×12',p1:'10 kg',p2:'14-16 kg',p3:'18-22 kg'},
-    {n:'Finisher: Plancha frontal',s:'3×30-45s',p1:'PC',p2:'PC',p3:'PC+5kg'},
-   ]},
-];
-
-var PLAN_U2 = [
-  {dia:'Pierna 1',tipo:'Cuádriceps + Core',color:'#ec4899',sub:'Hack · Prensa · Extensión · Isquio',
-   nota:'Mesociclo progresivo: M1=técnica, M2=carga moderada, M3=carga alta, M4=descarga.',
-   exs:[
-    {n:'Hack profunda / Hack con goma',s:'3×6-10',p1:'Peso ligero',p2:'Moderado',p3:'Carga alta'},
-    {n:'Prensa convergente',s:'3×6-8',p1:'50-70 kg',p2:'70-90 kg',p3:'90-120 kg'},
-    {n:'Extensión cuádriceps máquina',s:'3×12-15',p1:'20-30 kg',p2:'30-40 kg',p3:'40-55 kg'},
-    {n:'RDL mancuernas (isquio)',s:'3×10-12',p1:'10-14 kg',p2:'14-18 kg',p3:'18-22 kg'},
-    {n:'Curl femoral tumbado',s:'3×12-15',p1:'15-25 kg',p2:'25-35 kg',p3:'35-45 kg'},
-    {n:'Dead bug (Core)',s:'3×10/lado',p1:'PC',p2:'PC',p3:'PC'},
-   ]},
-  {dia:'Torso 1',tipo:'Push · Pecho/Hombro/Tríceps',color:'#a855f7',sub:'Pecho · Hombro · Tríceps',
-   nota:'Énfasis en deltoides medial y pectoral superior para definición de hombros.',
-   exs:[
-    {n:'Press inclinado 45° máquina convergente',s:'3×10-12',p1:'15-25 kg',p2:'25-35 kg',p3:'35-50 kg'},
-    {n:'Press militar máquina agarre neutro',s:'3×10-12',p1:'15-20 kg',p2:'20-30 kg',p3:'30-40 kg'},
-    {n:'Elevaciones laterales mancuernas',s:'4×12-15',p1:'3-5 kg',p2:'5-7 kg',p3:'7-10 kg'},
-    {n:'Elevaciones laterales desde polea baja',s:'3×15',p1:'5-8 kg',p2:'8-12 kg',p3:'12-16 kg'},
-    {n:'Peck-Deck invertida (deltoides P)',s:'3×15',p1:'20-30 kg',p2:'30-40 kg',p3:'40-50 kg'},
-    {n:'Extensión tríceps polea cuerda',s:'3×12',p1:'10-15 kg',p2:'15-20 kg',p3:'20-27 kg'},
-    {n:'Plancha frontal',s:'3×30-45s',p1:'PC',p2:'PC',p3:'PC'},
-   ]},
-  {dia:'Pierna 2',tipo:'Glúteo + Femoral',color:'#14b8a6',sub:'Hip thrust · RDL · Femoral · Abducción',
-   nota:'Día de glúteo. Isométrico de 1 seg al final de cada rep en hip thrust.',
-   exs:[
-    {n:'Hip thrust máquina',s:'3×12-15',p1:'30-50 kg',p2:'50-70 kg',p3:'70-90 kg'},
+-90 kg'},
     {n:'RDL con mancuernas y goma',s:'3×10-12',p1:'10-14 kg',p2:'14-18 kg',p3:'18-24 kg'},
     {n:'Curl femoral sentado unilateral',s:'3×12/lado',p1:'15-25 kg',p2:'25-35 kg',p3:'35-45 kg'},
     {n:'Patada glúteo en máquina',s:'3×15-20',p1:'20-30 kg',p2:'30-40 kg',p3:'40-55 kg'},
@@ -1215,7 +66,6 @@ function var_green(){return '#22c55e';}
 function var_amber(){return '#f59e0b';}
 function var_blue(){return '#3b82f6';}
 
-/* =================== STATE =================== */
 var currentUser = 'u1';
 var sessions = {u1:load('fl_ses_u1'), u2:load('fl_ses_u2')};
 var measures = {u1:load('fl_med_u1'), u2:load('fl_med_u2')};
@@ -1238,7 +88,6 @@ function M(){return measures[currentUser];}
 function P(){return profiles[currentUser];}
 function PLAN(){return currentUser==='u1'?PLAN_U1:PLAN_U2;}
 
-/* =================== ONBOARDING =================== */
 var onbUser='u1', onbData={};
 var onbEl=document.getElementById('onb');
 function checkOnb(){
@@ -1306,7 +155,6 @@ document.getElementById('onb-finish').addEventListener('click',function(){
   }
 });
 
-/* =================== CALCULADORA =================== */
 function calcPlan(p){
   var s=p.sexo==='M';
   var tmb=s?(88.362+13.397*p.peso+4.799*p.altura-5.677*p.edad):(447.593+9.247*p.peso+3.098*p.altura-4.330*p.edad);
@@ -1333,7 +181,6 @@ function calcHTML(c,p){
     +'</div>';
 }
 
-/* =================== INIT APP =================== */
 function initApp(){
   currentUser=profiles.u1&&profiles.u1.nombre?'u1':'u2';
   switchUser(currentUser);
@@ -1349,7 +196,6 @@ function initApp(){
   renderDash();
 }
 
-/* =================== USER SWITCH =================== */
 function switchUser(u){
   currentUser=u;
   var isU2=u==='u2';
@@ -1361,7 +207,6 @@ function switchUser(u){
 document.getElementById('btn-u1').addEventListener('click',function(){switchUser('u1');});
 document.getElementById('btn-u2').addEventListener('click',function(){switchUser('u2');});
 
-/* =================== NAV =================== */
 var titles={home:'Inicio',sesion:'Nueva sesión',historial:'Historial',medidas:'Medidas',plan:'Mi plan',info:'Metodología'};
 function goTo(id){
   document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
@@ -1383,17 +228,14 @@ function wireBottomNav(){
 }
 function wireNav(){}
 
-/* =================== DASHBOARD =================== */
 function renderDash(){
   var p=P();
   var h=new Date().getHours();
   var nombre=p&&p.nombre?p.nombre:'';
   document.getElementById('d-greeting').textContent=(h<12?'Buenos días':h<20?'Buenas tardes':'Buenas noches')+(nombre?' '+nombre:'')+' 👋';
   document.getElementById('d-date').textContent=new Date().toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-
   var ses=S(); var med=M();
   document.getElementById('d-ses').textContent=ses.length;
-
   var ps=[].concat(ses).filter(function(s){return s.peso;}).sort(function(a,b){return new Date(b.fecha)-new Date(a.fecha);});
   var h2=p&&p.altura?p.altura/100:1.78;
   if(ps.length){
@@ -1407,18 +249,13 @@ function renderDash(){
     document.getElementById('d-peso').textContent='—';
     document.getElementById('d-imc').textContent='—';
   }
-
   var hoy=new Date();var lun=new Date(hoy);lun.setDate(hoy.getDate()-((hoy.getDay()+6)%7));lun.setHours(0,0,0,0);
   document.getElementById('d-semana').textContent=ses.filter(function(s){return new Date(s.fecha)>=lun;}).length;
-
-  // Hydration
   var calc=p&&p.peso?calcPlan(p):null;
   var aguaMeta=calc?calc.agua:2500;
   var hydActual=hydration[currentUser];
   document.getElementById('d-hyd-txt').textContent=hydActual+' / '+aguaMeta+' ml';
   document.getElementById('d-hyd-bar').style.width=Math.min(100,Math.round(hydActual/aguaMeta*100))+'%';
-
-  // Macros
   var dm=document.getElementById('d-macros');
   if(calc){
     dm.innerHTML='<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">'
@@ -1428,8 +265,6 @@ function renderDash(){
       +'<div class="stat"><div class="stat-val" style="font-size:20px;color:var(--blue);">'+calc.grasas+'g</div><div class="stat-lbl">grasas</div></div>'
       +'</div>';
   } else dm.innerHTML='<div style="font-size:13px;color:var(--t3);">Completa tu perfil para ver los macros</div>';
-
-  // Next workout
   var plan=PLAN();var tipos=plan.map(function(p){return p.dia;});
   var dow=new Date().getDay();
   var planMap={1:0,2:1,3:2,4:3,5:4};
@@ -1440,8 +275,6 @@ function renderDash(){
     dn.innerHTML='<div style="display:flex;align-items:center;gap:10px;"><div style="width:10px;height:10px;border-radius:50%;background:'+pd.color+';flex-shrink:0;"></div><div style="flex:1;"><div style="font-weight:700;font-size:14px;">'+pd.dia+' — '+pd.tipo+'</div><div style="font-size:11px;color:var(--t3);">'+pd.sub+'</div></div><button class="btn btn-sm '+(currentUser==='u2'?'btn-pink':'btn-acc')+'" id="btn-start">Iniciar →</button></div>';
     document.getElementById('btn-start').addEventListener('click',function(){goTo('sesion');});
   }
-
-  // Recent
   var dr=document.getElementById('d-recent');
   var rec=[].concat(ses).sort(function(a,b){return new Date(b.fecha)-new Date(a.fecha);}).slice(0,3);
   if(!rec.length) dr.innerHTML='<div class="empty"><div class="empty-ico">📋</div><div style="font-size:13px;">Sin sesiones aún</div></div>';
@@ -1451,7 +284,6 @@ function renderDash(){
   dr.querySelectorAll('.li').forEach(function(el){el.addEventListener('click',function(){showDet(this.getAttribute('data-id'));});});
 }
 
-/* =================== HYDRATION =================== */
 function wireHydration(){
   function addHyd(ml){
     hydration[currentUser]+=ml;
@@ -1468,7 +300,6 @@ function wireHydration(){
   document.getElementById('hyd-reset').addEventListener('click',function(){hydration[currentUser]=0;saveHyd(currentUser,0);renderDash();});
 }
 
-/* =================== SESION =================== */
 function wireSesion(){
   document.getElementById('btn-add-ex').addEventListener('click',function(){
     document.getElementById('ex-sel').value='';
@@ -1518,7 +349,6 @@ function renderExList(){
   el.querySelectorAll('button[data-i]').forEach(function(b){b.addEventListener('click',function(){exTemp.splice(parseInt(this.getAttribute('data-i')),1);renderExList();});});
 }
 
-/* =================== HISTORIAL =================== */
 function renderHist(){
   var ses=S();
   document.getElementById('hist-sub').textContent=ses.length+' sesiones registradas · '+(P().nombre||'');
@@ -1547,7 +377,6 @@ function showDet(id){
   openM('modal-det');
 }
 
-/* =================== MEDIDAS =================== */
 function wireMedidas(){
   document.getElementById('btn-add-med').addEventListener('click',function(){
     document.getElementById('m-fecha').value=new Date().toISOString().split('T')[0];
@@ -1570,7 +399,6 @@ function renderMed(){
   var campos=[{k:'peso',l:'Peso',u:'kg',d:true},{k:'cintura',l:'Cintura',u:'cm',d:true},{k:'cadera',l:'Cadera',u:'cm',d:true},{k:'pecho',l:'Pecho',u:'cm',d:false},{k:'brazo',l:'Brazo',u:'cm',d:false},{k:'muslo',l:'Muslo',u:'cm',d:false},{k:'pantorrilla',l:'Pantorrilla',u:'cm',d:false},{k:'grasa',l:'% Grasa',u:'%',d:true}].filter(function(c){return last[c.k];});
   md.innerHTML='<div style="font-size:11px;color:var(--t3);margin-bottom:9px;">'+new Date(last.fecha+'T12:00:00').toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})+'</div>'
     +'<div class="med-g">'+campos.map(function(c){var v=last[c.k];var delta=prev&&prev[c.k]?(v-prev[c.k]).toFixed(1):null;var good=delta!==null?(c.d?delta<0:delta>0):null;return '<div class="med-c"><div><span class="med-v">'+v+'</span><span class="med-u"> '+c.u+'</span></div><div class="med-l">'+c.l+'</div>'+(delta!==null?'<div class="med-d '+(good?'dd':'du')+'">'+(delta>0?'+':'')+delta+' '+c.u+'</div>':'')+'</div>';}).join('')+'</div>'+(last.notas?'<div style="margin-top:9px;font-size:11px;color:var(--t3);font-style:italic;">'+last.notas+'</div>':'');
-
   var mh=document.getElementById('med-hist');
   if(!sorted.length){mh.innerHTML='';return;}
   mh.innerHTML=sorted.map(function(m){
@@ -1579,17 +407,14 @@ function renderMed(){
   mh.querySelectorAll('button[data-mid]').forEach(function(b){b.addEventListener('click',function(){if(!confirm('¿Eliminar?'))return;measures[currentUser]=measures[currentUser].filter(function(m){return m.id!==this.getAttribute('data-mid');},this);save('fl_med_'+currentUser,measures[currentUser]);renderMed();toast('Eliminada');});});
 }
 
-/* =================== PLAN =================== */
 function renderPlan(){
   var p=P();
   var isU2=currentUser==='u2';
-  document.getElementById('plan-sub').textContent=(p.nombre||'Tu')+' · Plan '+( isU2?'femenino — definición':'masculino — recomposición');
-
-  // CALCULADORA
+  document.getElementById('plan-sub').textContent=(p.nombre||'Tu')+' · Plan '+(isU2?'femenino — definición':'masculino — recomposición');
   var pc=document.getElementById('plan-calc');
   if(p&&p.peso){
     var c=calcPlan(p);
-    pc.innerHTML='<div style="font-size:13px;color:var(--t2);margin-bottom:8px;">'+( p.sexo==='F'?'Mujer':'Hombre')+', '+p.edad+' años · '+p.peso+' kg · '+p.altura+' cm · '+( p.objetivo==='recomp'?'Recomposición':p.objetivo==='perdida'?'Pérdida grasa':p.objetivo==='volumen'?'Volumen':'Mantenimiento')+'</div>'+calcHTML(c,p)
+    pc.innerHTML='<div style="font-size:13px;color:var(--t2);margin-bottom:8px;">'+(p.sexo==='F'?'Mujer':'Hombre')+', '+p.edad+' años · '+p.peso+' kg · '+p.altura+' cm · '+(p.objetivo==='recomp'?'Recomposición':p.objetivo==='perdida'?'Pérdida grasa':p.objetivo==='volumen'?'Volumen':'Mantenimiento')+'</div>'+calcHTML(c,p)
       +'<button class="btn btn-sm" id="btn-edit-perfil" style="margin-top:8px;width:100%;">✏️ Editar perfil</button>';
     document.getElementById('btn-edit-perfil').addEventListener('click',function(){
       document.getElementById('p-nombre').value=p.nombre||'';
@@ -1599,19 +424,15 @@ function renderPlan(){
       document.getElementById('p-act').value=p.actividad||'1.55';
       document.getElementById('p-obj').value=p.objetivo||'recomp';
       document.getElementById('p-exp').value=p.experiencia||'4-12';
-      document.getElementById('perfil-title').textContent='Editar perfil — '+( p.nombre||'usuario');
+      document.getElementById('perfil-title').textContent='Editar perfil — '+(p.nombre||'usuario');
       openM('modal-perfil');
     });
   } else pc.innerHTML='<div style="font-size:13px;color:var(--t3);">Completa tu perfil para ver el cálculo</div>';
-
-  // PLAN DÍAS
   var pd=document.getElementById('plan-days');
   pd.innerHTML=PLAN().map(function(d,i){
     return '<div class="plan-day"><div class="plan-hdr" data-i="'+i+'"><div class="plan-dot" style="background:'+d.color+';"></div><div class="plan-info"><div class="plan-name">'+d.dia+' — '+d.tipo+'</div><div class="plan-sub">'+d.sub+'</div></div><span class="plan-chev" id="pchev-'+i+'">▼</span></div><div class="plan-body" id="pbody-'+i+'">'+(d.nota?'<div class="plan-note">'+d.nota+'</div>':'')+'<div style="display:grid;grid-template-columns:1fr auto;gap:4px;font-size:10px;color:var(--t3);padding:3px 0 6px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border);margin-bottom:4px;"><span>Ejercicio · Series</span><span>M1 / M2 / M3</span></div>'+d.exs.map(function(e){return '<div class="plan-ex-row"><div><div class="plan-ex-name">'+e.n+'</div><div class="plan-ex-s">'+e.s+'</div></div><div class="plan-ws"><span class="pw pw1">'+e.p1+'</span><span class="pw pw2">'+e.p2+'</span><span class="pw pw3">'+e.p3+'</span></div></div>';}).join('')+'</div></div>';
   }).join('');
   pd.querySelectorAll('.plan-hdr').forEach(function(h){h.addEventListener('click',function(){var i=this.getAttribute('data-i');document.getElementById('pbody-'+i).classList.toggle('open');document.getElementById('pchev-'+i).classList.toggle('open');});});
-
-  // ALIMENTOS
   var foods=isU2?FOODS_U2:FOODS_U1;
   var fa=document.getElementById('plan-foods');
   var fhtml='<div style="margin-bottom:8px;"><span style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;display:block;margin-bottom:5px;">Proteínas</span>'
@@ -1625,28 +446,23 @@ function renderPlan(){
   if(foods.prohibidos&&foods.prohibidos.length)fhtml+='<div style="margin-bottom:8px;"><span style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;display:block;margin-bottom:5px;">Prohibidos (test IgG él)</span>'
     +foods.prohibidos.map(function(f){return '<span class="badge br">'+f+'</span>';}).join('')+'</div>';
   fa.innerHTML=fhtml;
-
-  // SUPLEMENTOS
   var ps=document.getElementById('plan-supls');
   ps.innerHTML=SUPLS.map(function(s){
     return '<div class="supl"><div class="supl-ico">'+s.ico+'</div><div class="supl-body"><div class="supl-name">'+s.name+'</div><div class="supl-desc">'+s.desc+'</div><span class="prio" style="background:rgba(34,197,94,0.1);color:'+s.pcolor+';">P'+s.prio+'</span></div></div>';
   }).join('');
-
-  // HIDRATACIÓN
   var ph=document.getElementById('plan-hydration');
   var p2=P();var c2=p2&&p2.peso?calcPlan(p2):null;var agua=c2?c2.agua:2500;
-  ph.innerHTML='<div class="tip-block ok"><div class="tip-t">Meta diaria: ~'+Math.round(agua/100)*100+' ml</div><div class="tip-b">Basado en '+( p2.peso||'tu peso')+' kg × 35 ml/kg + actividad. '+( p2.actividad>1.55?'Añade 500ml extra por alta actividad.':'')+' Ajusta en días de calor o sudoración alta.</div></div>'
+  ph.innerHTML='<div class="tip-block ok"><div class="tip-t">Meta diaria: ~'+Math.round(agua/100)*100+' ml</div><div class="tip-b">Basado en '+(p2.peso||'tu peso')+' kg × 35 ml/kg + actividad. '+(p2.actividad>1.55?'Añade 500ml extra por alta actividad.':'')+' Ajusta en días de calor o sudoración alta.</div></div>'
     +'<div class="calc-row"><div class="calc-label">Pre-entreno (2-3h antes)</div><div class="calc-val" style="color:var(--blue);">400-600 ml</div></div>'
     +'<div class="calc-row"><div class="calc-label">Intra-entreno (cada 15-20 min)</div><div class="calc-val" style="color:var(--blue);">150-200 ml</div></div>'
-    +'<div class="calc-row"><div class="calc-label">Electrolitos intra (receta Karol)</div><div class="calc-val" style="color:var(--teal);">1g sal/L + limón</div></div>'
+    +'<div class="calc-row"><div class="calc-label">Electrolitos intra (receta ella)</div><div class="calc-val" style="color:var(--teal);">1g sal/L + limón</div></div>'
     +'<div class="calc-row"><div class="calc-label">Post-entreno (primeras 2h)</div><div class="calc-val" style="color:var(--green);">400-600 ml</div></div>'
     +'<div class="calc-row" style="border:none;"><div class="calc-label">Indicador de hidratación</div><div class="calc-val" style="color:var(--amber);">Orina pálida ✓</div></div>';
 }
 
-/* =================== FATIGA / INFO =================== */
 function renderFatiga(){
   var fg=document.getElementById('fatiga-grid');
-  fg.innerHTML='<div style="font-size:12px;color:var(--t2);margin-bottom:10px;line-height:1.6;">Basado en los Excel de seguimiento semanal (KAROL.xlsx). Registra la fatiga por grupo muscular después de cada sesión (0-10).</div>'
+  fg.innerHTML='<div style="font-size:12px;color:var(--t2);margin-bottom:10px;line-height:1.6;">Registra la fatiga por grupo muscular después de cada sesión (0-10).</div>'
     +'<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">'
     +MUSCULOS_FATIGA.map(function(m){
       return '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:9px 10px;"><div style="font-size:12px;font-weight:600;margin-bottom:4px;">'+m+'</div>'
@@ -1667,7 +483,6 @@ function renderRecetas(){
   }).join('');
 }
 
-/* =================== PERFIL EDIT =================== */
 function wireModals(){
   document.getElementById('btn-cancel-perfil').addEventListener('click',function(){closeM('modal-perfil');});
   document.getElementById('btn-save-perfil').addEventListener('click',function(){
@@ -1679,59 +494,38 @@ function wireModals(){
   document.querySelectorAll('.modal-ov').forEach(function(m){m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});});
 }
 
-/* =================== UTILS =================== */
 function openM(id){document.getElementById(id).classList.add('open');}
 function closeM(id){document.getElementById(id).classList.remove('open');}
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}
 
-/* =================== START =================== */
-
-/* =================== GUÍA DE EJERCICIOS =================== */
 var currentGuiaEx = null;
 
 function openGuia(nombreEjercicio) {
   var db = EJERCICIOS_DB[nombreEjercicio];
-  if (!db) {
-    // Si no está en la DB, generar con IA directamente
-    openGuiaAI(nombreEjercicio, null);
-    return;
-  }
+  if (!db) { openGuiaAI(nombreEjercicio, null); return; }
   currentGuiaEx = nombreEjercicio;
   document.getElementById('guia-nombre').textContent = nombreEjercicio;
   document.getElementById('guia-musculo').textContent = '💪 ' + db.musculo;
   document.getElementById('guia-maquina-tag').textContent = '🏋️ ' + db.maquina;
-  
-  // Imagen - usar placeholder si falla
   var img = document.getElementById('guia-img');
   img.style.display = 'block';
   img.src = db.img || '';
   img.onerror = function() { this.style.display = 'none'; };
-  
-  // Ejecución
   var el = document.getElementById('guia-ejecucion-list');
   el.innerHTML = db.ejecucion.map(function(step, i) {
     return '<div class="step-item"><div class="step-num">' + (i+1) + '</div><div>' + step + '</div></div>';
   }).join('');
-  
-  // Errores
   var err = document.getElementById('guia-errores-list');
   err.innerHTML = db.errores.map(function(e) {
     return '<div class="err-item"><span>❌</span><span>' + e + '</span></div>';
   }).join('');
-  
-  // Máquina
   document.getElementById('guia-maquina-desc').textContent = db.maquina_desc;
-  
-  // Reset tabs
   document.querySelectorAll('.guia-tab').forEach(function(t) { t.classList.remove('active'); });
   document.querySelectorAll('.guia-panel').forEach(function(p) { p.style.display = 'none'; });
   document.querySelector('.guia-tab[data-tab="ejecucion"]').classList.add('active');
   document.getElementById('guia-ejecucion').style.display = 'block';
-  
-  // Reset AI
   document.getElementById('ai-guia-result').style.display = 'none';
   document.getElementById('ai-guia-result').innerHTML = '';
-  
   openM('modal-guia');
 }
 
@@ -1753,10 +547,8 @@ async function generateAIGuia(nombre) {
   var resultDiv = document.getElementById('ai-guia-result');
   resultDiv.style.display = 'block';
   resultDiv.innerHTML = '<div class="ai-loading"><div class="ai-loading-dot"></div><div class="ai-loading-dot"></div><div class="ai-loading-dot"></div><div style="margin-top:10px;font-size:13px;">Generando guía con IA…</div></div>';
-  
   var db = EJERCICIOS_DB[nombre];
   var contextExtra = db ? 'Músculos: ' + db.musculo + '. Máquina: ' + db.maquina + '.' : '';
-  
   try {
     var response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -1770,39 +562,28 @@ async function generateAIGuia(nombre) {
         }]
       })
     });
-    
     var data = await response.json();
     var text = data.content[0].text.trim().replace(/```json|```/g, '').trim();
     var parsed = JSON.parse(text);
-    
-    // Update UI with AI data
     document.getElementById('guia-musculo').textContent = '💪 ' + parsed.musculo;
     document.getElementById('guia-maquina-tag').textContent = '🏋️ ' + parsed.maquina_breve;
-    
     document.getElementById('guia-ejecucion-list').innerHTML = parsed.pasos.map(function(step, i) {
       return '<div class="step-item"><div class="step-num">' + (i+1) + '</div><div>' + step + '</div></div>';
     }).join('');
-    
     document.getElementById('guia-errores-list').innerHTML = parsed.errores_comunes.map(function(e) {
       return '<div class="err-item"><span>❌</span><span>' + e + '</span></div>';
     }).join('');
-    
     document.getElementById('guia-maquina-desc').textContent = parsed.maquina_breve + '. RIR recomendado: ' + parsed.rir_recomendado;
-    
     resultDiv.innerHTML = '<div style="background:var(--accb);border:1px solid var(--acc);border-radius:var(--r);padding:10px 12px;font-size:12px;color:var(--acc2);line-height:1.6;">⭐ <strong>Consejo pro:</strong> ' + parsed.consejo_pro + '</div>';
-    
-    // Reset tabs to show ejecucion
     document.querySelectorAll('.guia-tab').forEach(function(t) { t.classList.remove('active'); });
     document.querySelectorAll('.guia-panel').forEach(function(p) { p.style.display = 'none'; });
     document.querySelector('.guia-tab[data-tab="ejecucion"]').classList.add('active');
     document.getElementById('guia-ejecucion').style.display = 'block';
-    
   } catch(err) {
     resultDiv.innerHTML = '<div style="color:var(--red);font-size:13px;padding:10px;">Error al generar guía. Comprueba la conexión a internet.</div>';
   }
 }
 
-// Wire guia tabs
 document.querySelectorAll('.guia-tab').forEach(function(tab) {
   tab.addEventListener('click', function() {
     var target = this.getAttribute('data-tab');
@@ -1816,17 +597,14 @@ document.querySelectorAll('.guia-tab').forEach(function(tab) {
 document.getElementById('btn-ai-guia').addEventListener('click', function() {
   if (currentGuiaEx) generateAIGuia(currentGuiaEx);
 });
-
 document.getElementById('btn-close-guia').addEventListener('click', function() { closeM('modal-guia'); });
 
-/* =================== FICHA COMPLETA =================== */
 function openFicha() {
   var p = P();
   var isU2 = currentUser === 'u2';
   document.getElementById('ficha-title').textContent = 'Ficha de ' + (p.nombre || 'usuario');
   document.getElementById('ficha-avatar').textContent = isU2 ? '🌸' : '💪';
   document.getElementById('ficha-avatar').style.background = isU2 ? 'var(--pb)' : 'var(--accb)';
-  
   document.getElementById('f-nombre').value = p.nombre || '';
   document.getElementById('f-apellidos').value = p.apellidos || '';
   document.getElementById('f-fnac').value = p.fnac || '';
@@ -1838,7 +616,6 @@ function openFicha() {
   document.getElementById('f-exp').value = p.experiencia || '4-12';
   document.getElementById('f-lesiones').value = p.lesiones || '';
   document.getElementById('f-notas-ent').value = p.notas_entrenador || '';
-  
   openM('modal-ficha');
 }
 
@@ -1847,12 +624,10 @@ document.getElementById('btn-save-ficha').addEventListener('click', function() {
   var p = profiles[currentUser] || {};
   var fnac = document.getElementById('f-fnac').value;
   var edad = fnac ? (new Date().getFullYear() - parseInt(fnac.split('-')[0])) : (p.edad || 0);
-  
   profiles[currentUser] = Object.assign(p, {
     nombre: document.getElementById('f-nombre').value,
     apellidos: document.getElementById('f-apellidos').value,
-    fnac: fnac,
-    edad: edad,
+    fnac: fnac, edad: edad,
     sexo: document.getElementById('f-sexo').value,
     peso: parseFloat(document.getElementById('f-peso').value) || p.peso,
     altura: parseInt(document.getElementById('f-altura').value) || p.altura,
@@ -1864,16 +639,13 @@ document.getElementById('btn-save-ficha').addEventListener('click', function() {
   });
   save('fl_prof_' + currentUser, profiles[currentUser]);
   closeM('modal-ficha');
-  renderDash();
-  renderPlan();
+  renderDash(); renderPlan();
   toast('Ficha guardada ✓');
 });
 
-/* Override renderPlan para añadir ficha y botón de guía en ejercicios */
 var _origRenderPlan = renderPlan;
 renderPlan = function() {
   _origRenderPlan();
-  // Añadir botón de ficha al plan
   var pc = document.getElementById('plan-calc');
   if (pc) {
     var fichaBtn = document.createElement('button');
@@ -1889,7 +661,6 @@ renderPlan = function() {
   }
 };
 
-/* Añadir botón "Ver guía" en el modal de añadir ejercicio */
 var origExSel = document.getElementById('ex-sel');
 origExSel.addEventListener('change', function() {
   var nombre = this.value;
@@ -1901,10 +672,7 @@ origExSel.addEventListener('change', function() {
       preBtn.className = 'btn btn-sm';
       preBtn.style.cssText = 'width:100%;margin-bottom:10px;gap:6px;background:var(--accb);border-color:var(--acc);color:var(--acc2);';
       preBtn.innerHTML = '👁 Ver guía de ejecución: ' + nombre;
-      preBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        openGuia(nombre);
-      });
+      preBtn.addEventListener('click', function(e) { e.preventDefault(); openGuia(nombre); });
       this.parentNode.insertAdjacentElement('afterend', preBtn);
     } else {
       existingBtn.innerHTML = '👁 Ver guía de ejecución: ' + nombre;
@@ -1913,11 +681,9 @@ origExSel.addEventListener('change', function() {
   }
 });
 
-/* Añadir click en ejercicios del historial para ver guía */
 var origShowDet = showDet;
 showDet = function(id) {
   origShowDet(id);
-  // Añadir onclick a los nombres de ejercicios en el detalle
   setTimeout(function() {
     var detContent = document.getElementById('det-content');
     if (detContent) {
@@ -1932,8 +698,6 @@ showDet = function(id) {
   }, 100);
 };
 
-/* Añadir botones de guía en el plan de ejercicios */
-var origRenderPlanBase = renderPlan;
 function addGuiaButtonsToPlan() {
   document.querySelectorAll('.plan-ex-name').forEach(function(el) {
     if (!el.dataset.guiaWired) {
@@ -1942,7 +706,6 @@ function addGuiaButtonsToPlan() {
       var nombre = el.textContent.trim();
       el.addEventListener('click', function() { openGuia(nombre); });
       el.title = 'Pulsa para ver guía de ejecución';
-      // Añadir mini icono
       var ico = document.createElement('span');
       ico.textContent = ' 📖';
       ico.style.fontSize = '10px';
@@ -1951,18 +714,12 @@ function addGuiaButtonsToPlan() {
   });
 }
 
-// Ejecutar después de que el plan renderice
-var _planObserver = new MutationObserver(function() {
-  addGuiaButtonsToPlan();
-});
+var _planObserver = new MutationObserver(function() { addGuiaButtonsToPlan(); });
 setTimeout(function() {
   var planDays = document.getElementById('plan-days');
-  if (planDays) {
-    _planObserver.observe(planDays, { childList: true, subtree: true });
-  }
+  if (planDays) { _planObserver.observe(planDays, { childList: true, subtree: true }); }
 }, 1000);
 
-/* Actualizar onboarding para pedir apellidos y fecha de nacimiento */
 var origOnbFinish = document.getElementById('onb-finish');
 origOnbFinish.removeEventListener('click', origOnbFinish._handler);
 document.getElementById('onb-finish').addEventListener('click', function() {
@@ -1984,7 +741,6 @@ document.getElementById('onb-finish').addEventListener('click', function() {
   }
 });
 
-/* HOME: añadir botón de ficha en el dashboard */
 setTimeout(function() {
   var greet = document.getElementById('d-greeting');
   if (greet && !document.getElementById('btn-mi-ficha')) {
@@ -1998,7 +754,6 @@ setTimeout(function() {
   }
 }, 500);
 
-/* BIBLIOTECA DE EJERCICIOS - pantalla extra accesible desde Info */
 function renderBiblioteca() {
   var grupos = {};
   Object.keys(EJERCICIOS_DB).forEach(function(nombre) {
@@ -2007,10 +762,8 @@ function renderBiblioteca() {
     if (!grupos[g]) grupos[g] = [];
     grupos[g].push(nombre);
   });
-  
   var bl = document.getElementById('biblioteca-list');
   if (!bl) return;
-  
   bl.innerHTML = Object.keys(grupos).map(function(grupo) {
     return '<div style="margin-bottom:12px;">'
       + '<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">'+grupo+'</div>'
@@ -2022,15 +775,11 @@ function renderBiblioteca() {
         }).join('')
       + '</div>';
   }).join('');
-  
   bl.querySelectorAll('.li[data-ex]').forEach(function(el) {
-    el.addEventListener('click', function() {
-      openGuia(this.getAttribute('data-ex'));
-    });
+    el.addEventListener('click', function() { openGuia(this.getAttribute('data-ex')); });
   });
 }
 
-/* Añadir sección de biblioteca en pantalla Info */
 setTimeout(function() {
   var infoScreen = document.getElementById('screen-info');
   if (infoScreen && !document.getElementById('biblioteca-list')) {
@@ -2041,7 +790,6 @@ setTimeout(function() {
     renderBiblioteca();
   }
 }, 200);
-
 
 checkOnb();
 </script>
