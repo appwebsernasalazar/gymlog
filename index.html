@@ -549,13 +549,29 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <div class="card"><div class="card-title" style="margin-bottom:10px;">💊 Suplementación</div><div id="perfil-supls"></div></div>
   <div class="card">
     <div class="card-title" style="margin-bottom:10px;">⚙️ Configuración</div>
-    <div style="font-size:12px;color:var(--green);background:var(--gb);border-radius:8px;padding:9px 12px;margin-bottom:10px;line-height:1.6;">
-      <b>🆓 IA Gratuita:</b> Usa Gemini de Google (sin pago). Obtén tu clave gratis en <b>aistudio.google.com</b> (inicia sesión con Google → Get API key → Create API Key).
+    <!-- Opción recomendada: Anthropic Claude -->
+    <div style="font-size:12px;color:var(--acc2);background:var(--accb);border-radius:8px;padding:10px 12px;margin-bottom:10px;line-height:1.7;border:1px solid rgba(108,79,255,0.3);">
+      <b>⭐ Opción recomendada — Anthropic Claude:</b><br>
+      1. Ve a <b>console.anthropic.com</b><br>
+      2. Crea cuenta → <b>API Keys → Create Key</b><br>
+      3. Clave empieza por <b>sk-ant-...</b><br>
+      4. Pégala abajo · Incluye <b>$5 de crédito gratis</b> al registrarte
     </div>
-    <div class="fg"><label>API Key Gemini (Google · GRATIS)</label><input type="password" id="cfg-gemini" placeholder="AIza..."></div>
-    <div style="font-size:11px;color:var(--t3);margin-top:-6px;margin-bottom:10px;">aistudio.google.com → Get API Key → Create API Key</div>
-    <div class="sep" style="margin:8px 0;"></div>
-    <div class="fg"><label>API Key Anthropic (opcional, más potente)</label><input type="password" id="cfg-key" placeholder="sk-ant-..."></div>
+    <div class="fg"><label>API Key Anthropic Claude ⭐</label><input type="password" id="cfg-key" placeholder="sk-ant-..."></div>
+    <div class="sep" style="margin:10px 0;"></div>
+    <!-- Opción alternativa: Gemini -->
+    <div style="font-size:12px;color:var(--t2);background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:10px;line-height:1.7;border:1px solid var(--border2);">
+      <b>🔑 Alternativa — Google Gemini (si tienes clave AIza...):</b><br>
+      Solo funciona si tu cuenta genera claves <b>AIza...</b> (no AQ.)<br>
+      Obtener en: <b>aistudio.google.com/apikey</b>
+    </div>
+    <div class="fg"><label>API Key Gemini (solo si empieza por AIza...)</label><input type="password" id="cfg-gemini" placeholder="AIza..."></div>
+    <div style="font-size:11px;color:var(--t3);margin-top:-6px;margin-bottom:8px;">Si tu clave empieza por AQ. no funcionará — usa Claude en su lugar.</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><button class="btn btn-sm btn-ghost" id="btn-test-gemini" style="flex-shrink:0;">Probar conexión</button><span id="gemini-test-status" style="font-size:12px;"></span></div>
+    <div class="sep" style="margin:10px 0;"></div>
+    <div style="font-size:12px;color:var(--green);background:var(--gb);border-radius:8px;padding:9px 12px;margin-bottom:12px;line-height:1.6;">
+      <b>✅ Sin API key:</b> el análisis automático funciona siempre y es completamente gratis. Pulsa "Analizar" en Progreso sin configurar nada.
+    </div>
     <button class="btn btn-green btn-full" id="btn-save-cfg" style="margin-bottom:8px;">Guardar configuración</button>
     <button class="btn btn-d btn-full" id="btn-logout">Cerrar sesión</button>
   </div>
@@ -1201,6 +1217,9 @@ function initApp(){
     if(gk) localStorage.setItem('specimen_gemini',gk);
     toast('Configuración guardada ✓');
   });
+  // Listener nuevo — botón probar conexión Gemini
+  var btnTestG=$('btn-test-gemini');
+  if(btnTestG) btnTestG.addEventListener('click', testGeminiConnection);
 
   // Edit objetivo live toggle
   var editObj=$('edit-obj');
@@ -1855,90 +1874,228 @@ async function runIA(){
   var meds=u.measures||[]; var lastMed=meds[meds.length-1]||{}; var prevMed=meds[meds.length-2]||{};
 
   // ── Análisis automático sin API key ──
-  if(!ANTHROPIC_KEY){
+  if(!GEMINI_KEY && !ANTHROPIC_KEY){
+    var mac2=u.macros||calcMacros(u);
     var numSes=sesUlt7.length;
     var rpeArr=sesUlt7.map(function(s){return parseFloat(s.rpe)||7;});
-    var rpeAvg=rpeArr.length?Math.round(rpeArr.reduce(function(a,b){return a+b;},0)/rpeArr.length):7;
+    var rpeAvg=rpeArr.length?(sesUlt7.reduce(function(a,s){return a+(parseFloat(s.rpe)||7);},0)/sesUlt7.length).toFixed(1):'—';
     var fatArr=sesUlt7.map(function(s){return parseFloat(s.fat)||5;});
     var fatAvg=fatArr.length?Math.round(fatArr.reduce(function(a,b){return a+b;},0)/fatArr.length):5;
     var pesoCambio=lastMed.peso&&prevMed.peso?(parseFloat(lastMed.peso)-parseFloat(prevMed.peso)).toFixed(1):null;
-    var nivel=numSes>=4?'bueno':numSes>=2?'regular':'necesita_mejorar';
-    var niv={'bueno':'b','regular':'r','necesita_mejorar':'m'}[nivel];
-    var nivLabel={'bueno':'✅ Buen progreso','regular':'⚡ Progreso regular','necesita_mejorar':'⚠️ Necesita ajustes'}[nivel];
+    var cinCambio=lastMed.cin&&prevMed.cin?(parseFloat(lastMed.cin)-parseFloat(prevMed.cin)).toFixed(1):null;
+    var obj=u.obj||'recomp';
+    var esH=u.genero==='H';
 
+    // ── Calcular volumen total semanal ──
+    var volSemanal=sesUlt7.reduce(function(total,ses){
+      return total+(ses.exs||[]).reduce(function(a,e){return a+(e.volumenTotal||0);},0);
+    },0);
+
+    // ── Calcular mejor rendimiento por ejercicio ──
+    var ejerciciosMejoras=[];
+    var exMap={};
+    sesUlt7.forEach(function(ses){
+      (ses.exs||[]).forEach(function(ex){
+        if(!exMap[ex.n]) exMap[ex.n]={maxKg:0,maxReps:0};
+        (ex.series||[]).forEach(function(s){
+          if(s.done){
+            if(parseFloat(s.kg)>exMap[ex.n].maxKg) exMap[ex.n].maxKg=parseFloat(s.kg)||0;
+            if(parseInt(s.reps)>exMap[ex.n].maxReps) exMap[ex.n].maxReps=parseInt(s.reps)||0;
+          }
+        });
+      });
+    });
+
+    // ── Nivel de progreso ──
+    var nivel, niv, nivLabel;
+    var rpeNum=parseFloat(rpeAvg)||7;
+    if(numSes>=4 && rpeNum>=6 && rpeNum<=8.5){nivel='bueno';niv='b';nivLabel='✅ Buen progreso';}
+    else if(numSes>=3 || (numSes>=2 && rpeNum>5)){nivel='regular';niv='r';nivLabel='⚡ Progreso regular';}
+    else{nivel='necesita_mejorar';niv='m';nivLabel='⚠️ Necesita ajustes';}
+
+    // Si el objetivo es pérdida y hay datos de peso
+    if(pesoCambio!==null && obj==='perdida'){
+      var cambioN=parseFloat(pesoCambio);
+      if(cambioN<-1.2){nivel='necesita_mejorar';niv='m';nivLabel='⚠️ Bajada demasiado rápida';}
+      else if(cambioN>0.3 && numSes>=4){nivel='regular';niv='r';nivLabel='⚡ Sin déficit efectivo';}
+    }
+
+    // ── Ajustes de entrenamiento ──
     var ajEntreno=[];
-    var ajNutricion=[];
-    var recomendacion='';
-
     if(numSes>=4){
-      recomendacion='Excelente constancia esta semana. Mantén el plan y considera aumentar el peso en los ejercicios principales un 2-5% la próxima semana.';
-      if(rpeAvg>=9) ajEntreno.push('RPE muy alto ('+rpeAvg+'/10) — considera reducir el peso un 5-10% o añadir un día extra de descanso.');
-      else if(rpeAvg<=5) ajEntreno.push('RPE bajo ('+rpeAvg+'/10) — tienes margen para incrementar la carga. Sube el peso en los compuestos principales.');
-      else ajEntreno.push('RPE en rango óptimo ('+rpeAvg+'/10). Continúa progresando con la carga actual.');
-      if(fatAvg>=7) ajEntreno.push('Fatiga acumulada alta ('+fatAvg+'/10) — prioriza el descanso, el sueño y la hidratación este fin de semana.');
-    } else if(numSes>=2){
-      recomendacion='Semana incompleta ('+numSes+'/5 sesiones). Intenta planificar los entrenos con antelación para la próxima semana.';
-      ajEntreno.push('Completaste '+numSes+' de 5 sesiones. Cada sesión perdida es una semana de progreso retrasado.');
-      ajEntreno.push('Identifica qué día de la semana te cuesta más cumplir y ajusta el plan de orden de días si es necesario.');
+      if(rpeNum>=9) ajEntreno.push('RPE muy alto ('+rpeAvg+'/10): reduce el peso un 5% la próxima semana o añade un día de descanso activo extra. La sobreestimulación frena el progreso.');
+      else if(rpeNum<=5) ajEntreno.push('RPE bajo ('+rpeAvg+'/10): tienes margen claro para subir carga. Incrementa el peso en press banca, sentadilla y peso muerto un 2.5-5 kg la próxima semana.');
+      else ajEntreno.push('RPE en zona óptima ('+rpeAvg+'/10): continúa con sobrecarga progresiva. Intenta añadir 1 rep o 1.25-2.5 kg en los ejercicios compuestos.');
+      if(fatAvg>=7) ajEntreno.push('Fatiga acumulada alta ('+fatAvg+'/10): este fin de semana prioriza sueño de 8h, hidratación y estiramientos. Considera una semana de deload (carga al 60%) si llevas 6+ semanas de intensidad alta.');
+      else if(fatAvg<=3) ajEntreno.push('Fatiga baja ('+fatAvg+'/10): buena señal de recuperación. Puedes aumentar el volumen añadiendo 1 serie extra en los grupos musculares prioritarios.');
+    } else if(numSes===3){
+      ajEntreno.push('3 de 5 sesiones completadas: buen inicio, pero para recomposición corporal óptima necesitas 4-5 días. Identifica el día que fallaste y planifica una solución concreta para la próxima semana.');
+      ajEntreno.push('Entreno mínimo de 45 min es más efectivo que no entrenar. Si tienes poco tiempo, prioriza los ejercicios compuestos: sentadilla, peso muerto y press.');
+    } else if(numSes===2){
+      ajEntreno.push('Solo 2 sesiones esta semana: el estímulo fue insuficiente para progresar. La consistencia genera el 80% de los resultados. Esta semana objetivo mínimo: 4 sesiones.');
+      ajEntreno.push('Consejo práctico: prepara la ropa de entreno la noche anterior y bloquea los horarios en el calendario como citas inamovibles.');
+    } else if(numSes===1){
+      ajEntreno.push('1 sesión registrada: semana muy por debajo del mínimo eficaz. Evalúa qué obstáculos específicos impidieron entrenar y abórdalos directamente.');
+      ajEntreno.push('Plan de emergencia: si no puedes ir al gym, 20 min de trabajo de fuerza en casa (sentadillas, fondos, remos con mochila) es mejor que nada y mantiene el estímulo muscular.');
     } else {
-      recomendacion='Semana muy baja en entrenamiento. Recuerda que la consistencia es el factor #1 en resultados. Esta semana: mínimo 3 sesiones.';
-      ajEntreno.push('Solo '+numSes+' sesión(es) registrada(s). La consistencia supera a la intensidad en importancia.');
+      ajEntreno.push('Sin sesiones registradas esta semana. El músculo se atrofia sin estímulo: después de 10-14 días sin entrenar comienzas a perder fuerza y masa. Esta semana: mínimo 3 sesiones.');
+      ajEntreno.push('Empieza mañana con una sesión corta de 30 min. No hace falta que sea perfecta — lo importante es retomar el hábito.');
     }
 
+    // Análisis de volumen
+    if(volSemanal>0){
+      ajEntreno.push('Volumen total semanal: '+volSemanal.toLocaleString()+' kg. '+(volSemanal>10000?'Excelente volumen de trabajo. Asegúrate de que la recuperación es suficiente.':volSemanal>5000?'Buen volumen. Puedes incrementarlo un 10% la próxima semana.':'Volumen moderado. Aumenta progresivamente las cargas para estimular más adaptación.'));
+    }
+
+    // ── Ajustes de nutrición ──
+    var ajNutricion=[];
+    var prot=mac2.prot||160;
+    var kcal=mac2.kcal||2000;
+    var agua=mac2.agua||2500;
+
+    // Análisis de peso vs objetivo
     if(pesoCambio!==null){
-      var cambioNum=parseFloat(pesoCambio);
-      var obj=u.obj||'recomp';
+      var cambioN=parseFloat(pesoCambio);
       if(obj==='perdida'){
-        if(cambioNum<-0.8) ajNutricion.push('Bajada de peso rápida ('+pesoCambio+'kg) — asegúrate de mantener la proteína alta para no perder músculo.');
-        else if(cambioNum>0) ajNutricion.push('El peso subió '+pesoCambio+'kg — revisa las porciones de carbohidratos, especialmente en los días sin entreno.');
-        else ajNutricion.push('Peso estable o leve bajada ('+pesoCambio+'kg) — progreso saludable. Mantén el déficit calórico actual.');
+        if(cambioN<-1.2) ajNutricion.push('⚠️ Bajada muy rápida ('+pesoCambio+' kg): un déficit tan agresivo cataboliza músculo. Aumenta 200-300 kcal diarias, priorizando proteína y carbohidratos post-entreno.');
+        else if(cambioN<-0.8) ajNutricion.push('Pérdida en el límite superior ('+pesoCambio+' kg/semana): está cerca del máximo sostenible. Vigila la fuerza en el gym — si baja más del 5%, sube calorías ligeramente.');
+        else if(cambioN>=-0.7 && cambioN<=-0.2) ajNutricion.push('✅ Pérdida ideal ('+pesoCambio+' kg/semana): dentro del rango óptimo de 0.2-0.7 kg/semana que maximiza pérdida de grasa preservando músculo. Mantén el déficit actual de '+mac2.deficitReal+'%.');
+        else if(cambioN>0.2) ajNutricion.push('El peso subió '+pesoCambio+' kg en déficit: puede ser retención de agua (sal, carbos, estrés) o exceso calórico real. Revisa porciones de grasas y alcohol. Si persiste 2 semanas, reduce 100-150 kcal.');
+        else ajNutricion.push('Peso casi estable ('+pesoCambio+' kg): el déficit está actuando de forma muy conservadora. Considera aumentar el cardio NEAT (pasos diarios) antes de reducir más calorías.');
       } else if(obj==='recomp'){
-        if(Math.abs(cambioNum)<=0.5) ajNutricion.push('Peso estable ('+pesoCambio+'kg) — ideal para recomposición. Si el rendimiento sube, el plan está funcionando.');
-        else ajNutricion.push('Cambio de peso: '+pesoCambio+'kg. En recomposición es normal fluctuar. Prioriza cómo te ves y cómo rindes.');
+        if(Math.abs(cambioN)<=0.5) ajNutricion.push('✅ Peso estable ('+pesoCambio+' kg): ideal para recomposición. El músculo se construye y la grasa se pierde simultáneamente — el marcador clave es tu rendimiento y medidas, no el peso.');
+        else if(cambioN>0.5) ajNutricion.push('Subida de '+pesoCambio+' kg en recomposición: revisa las calorías. Puede ser ganancia muscular legítima si el rendimiento subió, o exceso calórico si las medidas también aumentaron.');
+        else ajNutricion.push('Bajada de '+pesoCambio+' kg: en recomposición un pequeño déficit está bien, pero verifica que la proteína esté en los '+prot+'g diarios para proteger el músculo.');
       } else if(obj==='volumen'){
-        if(cambioNum<0.1) ajNutricion.push('Peso estancado en fase de volumen — prueba añadir 150-200 kcal extra, preferiblemente en carbohidratos post-entreno.');
-        else ajNutricion.push('Ganando '+pesoCambio+'kg — correcto para volumen. Si supera 0.5kg/semana considera reducir ligeramente las calorías.');
+        if(cambioN>0.6) ajNutricion.push('Subiendo '+pesoCambio+' kg/semana: puede ser algo rápido. Idealmente 0.25-0.5 kg/semana en volumen limpio. Si la fuerza sube, es buena señal; si no, reduce 100-200 kcal.');
+        else if(cambioN<0.1) ajNutricion.push('Peso estancado en volumen: necesitas superávit real. Añade 200 kcal extra al día, preferiblemente en avena, quinoa o boniato post-entreno.');
+        else ajNutricion.push('✅ Subida de '+pesoCambio+' kg: ritmo correcto para volumen limpio. Continúa con el superávit actual y monitoriza que la fuerza progrese cada semana.');
       }
+    } else {
+      ajNutricion.push('Registra tu peso cada semana (mismo horario, en ayunas) para poder analizar si el déficit de '+mac2.deficitDiario+' kcal/día está funcionando correctamente.');
     }
 
-    ajNutricion.push('Hidratación: revisa que alcanzas el objetivo de '+(u.macros&&u.macros.agua?Math.round(u.macros.agua/100)*100:2500)+' ml/día especialmente los días de entreno.');
-    if(u.genero==='H') ajNutricion.push('Proteína: apunta a '+(u.macros&&u.macros.prot||'160')+'g diarios. Distribuye en 4-5 tomas para máxima síntesis proteica.');
-    else ajNutricion.push('Proteína: objetivo '+(u.macros&&u.macros.prot||'120')+'g diarios. No olvides el aporte post-entreno (batido o comida proteica).');
+    // Análisis de cintura
+    if(cinCambio!==null){
+      var cinN=parseFloat(cinCambio);
+      if(cinN<-0.5) ajNutricion.push('✅ Cintura redujo '+Math.abs(cinCambio)+' cm: señal directa de pérdida de grasa visceral. Excelente indicador, más fiable que el peso solo.');
+      else if(cinN>0.5) ajNutricion.push('Cintura aumentó '+cinCambio+' cm: posible retención de agua o exceso calórico. Reduce el sodio y revisa porciones de carbohidratos en las noches.');
+    }
+
+    // Proteína siempre
+    ajNutricion.push('Proteína objetivo: '+prot+'g/día distribuidos en '+( esH?'5':'4')+' tomas ('+Math.round(prot/(esH?5:4))+'g/toma aprox.). Las mejores fuentes: '+(esH?'pollo, pavo, salmón, huevos enteros, Whey Isolate.':'pollo, pavo, salmón, huevos, yogur griego, Whey.'));
+    ajNutricion.push('Hidratación: objetivo '+Math.round(agua/100)*100+' ml/día. Los días de entreno añade 400-600 ml extra. La deshidratación reduce la fuerza hasta un 10% y frena la síntesis proteica.');
+
+    // Timing nutricional según objetivo
+    if(obj==='perdida' || obj==='recomp'){
+      ajNutricion.push('Timing: concentra los carbohidratos en el desayuno y post-entreno (ventana de 2h). Por la noche prioriza proteína + verduras + grasas saludables para mantener la saciedad sin exceso calórico.');
+    } else if(obj==='volumen'){
+      ajNutricion.push('Timing en volumen: 40-60g de carbohidratos (avena, boniato, quinoa) 1-2h antes del entreno y otros 40-60g post-entreno con proteína. Esto maximiza el rendimiento y la síntesis proteica post-ejercicio.');
+    }
+
+    // ── Recomendación de la semana ──
+    var recomendacion='';
+    var proximasSesiones=5-numSes>0?(5-numSes)+' sesiones pendientes':'todas las sesiones completadas';
+    if(nivel==='bueno'){
+      recomendacion='📈 Semana excelente — '+numSes+'/5 sesiones con RPE óptimo. Para la próxima semana: aplica sobrecarga progresiva (+1 rep o +2.5 kg) en los ejercicios principales. '
+        +(obj==='perdida'?'Mantén el déficit de '+mac2.deficitDiario+' kcal/día y pesa el día '+( esH?'lunes':'lunes')+' en ayunas para evaluar el progreso.':'')
+        +(obj==='recomp'?'Sigue priorizando la progresión de cargas — el aumento de fuerza es el mejor indicador de que estás ganando músculo y perdiendo grasa simultáneamente.':'')
+        +(obj==='volumen'?'Asegura el superávit calórico y duerme 7-9h. El crecimiento muscular ocurre en el descanso, no en el gym.':'');
+    } else if(nivel==='regular'){
+      recomendacion='⚡ Semana correcta pero con margen de mejora. Objetivo próxima semana: '+( numSes<4?'completar las '+Math.max(4,numSes+1)+' sesiones planificadas':'mantener la constancia y mejorar la calidad de los entrenamientos')+'. '
+        +'Planifica ahora mismo los días y horarios de entrenamiento de la próxima semana y ponlos en el calendario. '
+        +(pesoCambio?'El progreso físico ('+pesoCambio+' kg) '+(parseFloat(pesoCambio)<0?'va en la dirección correcta.':'requiere revisión nutricional.'):'Registra tu peso y medidas esta semana para poder hacer un seguimiento real del progreso.');
+    } else {
+      recomendacion='🎯 Semana con ajustes necesarios. Plan de acción para la próxima semana: (1) Haz mínimo 3 sesiones, aunque sean de 30-40 min. (2) Sigue el menú del plan al menos 5 de 7 días. (3) Registra tu peso el lunes y el viernes en ayunas. (4) Duerme 7h mínimo — sin sueño, las hormonas anabólicas no funcionan y el cortisol frena la pérdida de grasa. Pequeños pasos consistentes superan a esfuerzos esporádicos perfectos.';
+    }
+
+    // ── Render ──
+    var exList=Object.keys(exMap);
+    var mejoresHtml='';
+    if(exList.length){
+      mejoresHtml='<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;margin:10px 0 6px;">🏆 Mejores series esta semana</div>'
+        +'<div style="background:var(--bg3);border-radius:var(--r);padding:10px;margin-bottom:4px;">'
+        +exList.slice(0,5).map(function(n){
+          var e=exMap[n];
+          return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;">'
+            +'<span style="color:var(--t2);flex:1;">'+n+'</span>'
+            +(e.maxKg?'<span style="font-weight:700;color:var(--acc2);">'+e.maxKg+'kg × '+e.maxReps+'</span>':'<span style="color:var(--t3);">Sin datos</span>')
+            +'</div>';
+        }).join('')
+        +'</div>';
+    }
 
     $r.innerHTML='<div class="ia-card">'
       +'<div class="ia-nivel '+niv+'">'+nivLabel+'</div>'
-      +'<div style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:10px;">Semana analizada: '+numSes+'/5 sesiones completadas. RPE promedio: '+rpeAvg+'/10.'+(pesoCambio?(' Cambio de peso: '+pesoCambio+'kg.'):'')+'</div>'
-      +'<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;margin:8px 0 4px;">💪 Entreno</div>'
-      +ajEntreno.map(function(a){return '<div style="font-size:13px;color:var(--t2);padding:4px 0;display:flex;gap:7px;"><span style="color:var(--acc2);">→</span><span>'+a+'</span></div>';}).join('')
-      +'<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;margin:8px 0 4px;">🥗 Nutrición</div>'
-      +ajNutricion.map(function(a){return '<div style="font-size:13px;color:var(--t2);padding:4px 0;display:flex;gap:7px;"><span style="color:var(--green);">→</span><span>'+a+'</span></div>';}).join('')
-      +'<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;margin:8px 0 4px;">📅 Próxima semana</div>'
-      +'<div style="font-size:13px;color:var(--text);line-height:1.6;">'+recomendacion+'</div>'
-      +'<div style="font-size:11px;color:var(--t3);margin-top:10px;border-top:1px solid var(--border);padding-top:8px;">Análisis automático. Añade tu API Key de Anthropic en Perfil para análisis más detallado con IA.</div>'
+      // Resumen numérico
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px;">'
+        +'<div style="background:var(--bg3);border-radius:8px;padding:9px;text-align:center;">'
+          +'<div style="font-size:20px;font-weight:800;color:'+(numSes>=4?'var(--green)':numSes>=2?'var(--amber)':'var(--red)')+';">'+numSes+'/5</div>'
+          +'<div style="font-size:9px;color:var(--t3);text-transform:uppercase;">Sesiones</div>'
+        +'</div>'
+        +'<div style="background:var(--bg3);border-radius:8px;padding:9px;text-align:center;">'
+          +'<div style="font-size:20px;font-weight:800;color:var(--acc2);">'+rpeAvg+'</div>'
+          +'<div style="font-size:9px;color:var(--t3);text-transform:uppercase;">RPE prom.</div>'
+        +'</div>'
+        +'<div style="background:var(--bg3);border-radius:8px;padding:9px;text-align:center;">'
+          +'<div style="font-size:20px;font-weight:800;color:'+(pesoCambio&&parseFloat(pesoCambio)<0?'var(--green)':pesoCambio&&parseFloat(pesoCambio)>0.5?'var(--red)':'var(--t2)')+';">'+(pesoCambio?(parseFloat(pesoCambio)>0?'+':'')+pesoCambio:'—')+'kg</div>'
+          +'<div style="font-size:9px;color:var(--t3);text-transform:uppercase;">Peso Δ</div>'
+        +'</div>'
+      +'</div>'
+      +(volSemanal?'<div style="font-size:12px;color:var(--t2);margin-bottom:10px;text-align:center;">Volumen semanal total: <b style="color:var(--acc2);">'+volSemanal.toLocaleString()+' kg</b></div>':'')
+      // Ajustes
+      +'<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;margin:8px 0 5px;">💪 Ajustes de entrenamiento</div>'
+      +ajEntreno.map(function(a){return '<div style="font-size:13px;color:var(--t2);padding:5px 0;border-bottom:1px solid var(--border);display:flex;gap:7px;line-height:1.5;"><span style="color:var(--acc2);flex-shrink:0;">→</span><span>'+a+'</span></div>';}).join('')
+      +'<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;margin:12px 0 5px;">🥗 Ajustes de nutrición</div>'
+      +ajNutricion.map(function(a){return '<div style="font-size:13px;color:var(--t2);padding:5px 0;border-bottom:1px solid var(--border);display:flex;gap:7px;line-height:1.5;"><span style="color:var(--green);flex-shrink:0;">→</span><span>'+a+'</span></div>';}).join('')
+      // Mejores series
+      +mejoresHtml
+      // Recomendación
+      +'<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;margin:12px 0 5px;">📅 Plan próxima semana</div>'
+      +'<div style="font-size:13px;color:var(--text);line-height:1.7;background:var(--bg3);border-radius:var(--r);padding:11px;">'+recomendacion+'</div>'
+      // Footer
+      +'<div style="font-size:10px;color:var(--t3);margin-top:10px;border-top:1px solid var(--border);padding-top:8px;line-height:1.6;">'
+        +'⚙️ Análisis automático basado en tus datos reales · '+new Date().toLocaleDateString('es-ES')
+      +'</div>'
       +'</div>';
     return;
   }
 
-  // ── Con API Key (Gemini gratis primero, luego Anthropic) ──
-  var activeKey=GEMINI_KEY||ANTHROPIC_KEY;
-  var useGemini=!!GEMINI_KEY;
+  // ── Con API Key: Claude primero (más fiable), luego Gemini ──
+  var useGemini=!!GEMINI_KEY && !ANTHROPIC_KEY; // Gemini solo si no hay Claude
+  var activeKey=ANTHROPIC_KEY||GEMINI_KEY;
   var mac2=u.macros||calcMacros(u);
   var prompt='Eres un endocrinólogo clínico y entrenador fitness experto en recomposición corporal. Analiza el siguiente progreso semanal y responde ÚNICAMENTE con JSON válido, sin texto extra, sin bloques de código:\n{"resumen":"análisis clínico breve","ajustes_entreno":["ajuste1","ajuste2"],"ajustes_nutricion":["ajuste1","ajuste2"],"recomendacion":"plan concreto próxima semana","nivel":"bueno"}\n\nDATOS DEL USUARIO:\nGénero: '+(u.genero==='H'?'Hombre':'Mujer')+'\nObjetivo: '+LABEL_OBJ[u.obj||'recomp']+'\nBMR: '+mac2.bmr+' kcal · TDEE: '+mac2.tdee+' kcal · Objetivo: '+mac2.kcal+' kcal (déficit '+mac2.deficitReal+'%)\nMasa magra: '+mac2.masaMagra+' kg · % Grasa: '+(u.grasa||'—')+'%\nSesiones semana: '+sesUlt7.length+'/5\nRPE promedio: '+(sesUlt7.reduce(function(a,s){return a+(parseFloat(s.rpe)||7);},0)/Math.max(1,sesUlt7.length)).toFixed(1)+'/10\nPeso anterior: '+(prevMed.peso||u.peso||'—')+' kg → actual: '+(lastMed.peso||u.peso||'—')+' kg\nCintura: '+(prevMed.cin||'—')+' → '+(lastMed.cin||'—')+' cm';
   try{
     var resp, txt, aj;
-    if(useGemini){
-      // Gemini 2.0 Flash - GRATIS
-      var gUrl='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_KEY;
-      var gBody={contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.4,maxOutputTokens:800}};
-      resp=await fetch(gUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(gBody)});
-      var gd=await resp.json();
-      if(gd.error) throw new Error('Gemini: '+gd.error.message);
-      txt=gd.candidates[0].content.parts[0].text.replace(/```json|```/g,'').trim();
-    } else {
-      // Anthropic
-      resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,messages:[{role:'user',content:prompt}]})});
+    if(ANTHROPIC_KEY){
+      // ── Claude (Anthropic) — opción principal ──
+      resp=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01'},
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:900,messages:[{role:'user',content:prompt}]})
+      });
       var ad=await resp.json();
+      if(ad.error) throw new Error('Claude: '+(ad.error.message||ad.error.type));
       txt=ad.content[0].text.replace(/```json|```/g,'').trim();
+    } else if(GEMINI_KEY){
+      // ── Gemini (Google) — alternativa con clave AIza... ──
+      var gUrl='https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+      var gBody={
+        model:'gemini-2.5-flash',
+        messages:[{role:'user',content:prompt}],
+        temperature:0.4,
+        max_tokens:900,
+        response_format:{type:'json_object'}
+      };
+      resp=await fetch(gUrl,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+GEMINI_KEY},
+        body:JSON.stringify(gBody)
+      });
+      var gd=await resp.json();
+      if(gd.error) throw new Error('Gemini: '+(gd.error.message||JSON.stringify(gd.error)));
+      txt=(gd.choices[0].message.content||'').replace(/```json|```/g,'').trim();
     }
     aj=JSON.parse(txt);
     var niv={'bueno':'b','regular':'r','necesita_mejorar':'m'}[aj.nivel]||'r';
@@ -1951,7 +2108,7 @@ async function runIA(){
       +(aj.ajustes_nutricion||[]).map(function(a){return '<div style="font-size:13px;color:var(--t2);padding:4px 0;display:flex;gap:7px;"><span style="color:var(--green);">→</span><span>'+a+'</span></div>';}).join('')
       +'<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;margin:8px 0 4px;">📅 Próxima semana</div>'
       +'<div style="font-size:13px;color:var(--text);line-height:1.6;">'+aj.recomendacion+'</div>'
-      +'<div style="font-size:10px;color:var(--t3);margin-top:8px;border-top:1px solid var(--border);padding-top:6px;">Análisis con '+(useGemini?'Gemini 2.0 Flash (Google · gratuito)':'Claude Sonnet (Anthropic)')+'</div>'
+      +'<div style="font-size:10px;color:var(--t3);margin-top:8px;border-top:1px solid var(--border);padding-top:6px;">Análisis con '+(ANTHROPIC_KEY?'Claude Sonnet (Anthropic)':GEMINI_KEY?'Gemini 2.5 Flash (Google)':'IA')+'</div>'
       +'</div>';
   }catch(e){$r.innerHTML='<div style="font-size:13px;color:var(--red);">Error IA: '+e.message+'<br><span style="font-size:12px;color:var(--t2);">Verifica tu API key en Perfil → Configuración.</span></div>';}
 }
@@ -2082,6 +2239,50 @@ window.setTimer=function(s){clearInterval(APP.timerInt);APP.timerRun=false;APP.t
     initApp();
   }
 })();
+
+// ── NUEVA FUNCIÓN: testGeminiConnection ──────────────────
+// Prueba la clave de Gemini almacenada en localStorage.
+// No modifica ninguna función existente.
+async function testGeminiConnection(){
+  var statusEl=$('gemini-test-status');
+  var btn=$('btn-test-gemini');
+  var key=localStorage.getItem('specimen_gemini')||$('cfg-gemini').value.trim();
+  if(!key){
+    statusEl.style.color='var(--amber)';
+    statusEl.textContent='⚠️ Introduce primero la API Key y guarda.';
+    return;
+  }
+  btn.textContent='Probando...';
+  btn.disabled=true;
+  statusEl.textContent='';
+  try{
+    var gUrl='https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+    var gBody={
+      model:'gemini-2.5-flash',
+      messages:[{role:'user',content:'Responde únicamente con la palabra: ok'}],
+      max_tokens:10
+    };
+    var resp=await fetch(gUrl,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body:JSON.stringify(gBody)
+    });
+    var data=await resp.json();
+    if(data.error){
+      statusEl.style.color='var(--red)';
+      statusEl.textContent='✕ Error: '+(data.error.message||JSON.stringify(data.error));
+    } else {
+      statusEl.style.color='var(--green)';
+      statusEl.textContent='✓ Gemini conectado';
+    }
+  }catch(e){
+    statusEl.style.color='var(--red)';
+    statusEl.textContent='✕ Error: '+e.message;
+  }
+  btn.textContent='Probar conexión';
+  btn.disabled=false;
+}
+// ── FIN testGeminiConnection ──────────────────────────────
 </script>
 </body>
 </html>
