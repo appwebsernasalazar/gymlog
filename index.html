@@ -242,6 +242,24 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .rest-btn:active{opacity:0.7;}
 .rest-btn.rest-sel{border-color:var(--red);background:var(--rb);color:var(--red);font-weight:700;}
 .rest-btn.rest-sel::before{content:'✕ ';}
+/* ── Toggle contraseña ──────────────────── */
+.pw-wrap{position:relative;display:flex;align-items:center;}
+.pw-wrap input{flex:1;padding-right:44px;}
+.pw-eye{position:absolute;right:0;top:0;bottom:0;width:44px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t3);transition:color 0.15s;}
+.pw-eye:hover{color:var(--acc2);}
+.pw-eye svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+/* ── Plan semanal ejercicios ────────────── */
+.plan-ex-row2{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.12s;}
+.plan-ex-row2:last-child{border-bottom:none;}
+.plan-ex-row2:active{background:var(--bg4);margin:0 -16px;padding:12px 16px;}
+.plan-ex-num{width:26px;height:26px;border-radius:50%;background:var(--bg4);color:var(--t3);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--border2);}
+.plan-ex-body{flex:1;min-width:0;}
+.plan-ex-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.plan-ex-detail2{font-size:11px;color:var(--t3);display:flex;align-items:center;gap:6px;flex-wrap:wrap;line-height:1.5;}
+.plan-sets-badge{font-size:11px;font-weight:700;color:var(--acc2);background:var(--accb);padding:2px 7px;border-radius:4px;white-space:nowrap;}
+.plan-ex-pr{font-size:11px;color:var(--green);margin-top:3px;font-weight:500;}
+.plan-ex-arrow{color:var(--border2);font-size:20px;flex-shrink:0;line-height:1;}
+.hevy-card-sep{height:1px;background:var(--border);margin:0 0 2px;}
 </style>
 </head>
 <body>
@@ -263,7 +281,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     </div>
     <div class="fg"><label>Nombre completo</label><input type="text" id="ob-nombre" placeholder="Tu nombre y apellido"></div>
     <div class="fg"><label>Email</label><input type="email" id="ob-email" placeholder="correo@ejemplo.com" inputmode="email"></div>
-    <div class="fg"><label>Contraseña</label><input type="password" id="ob-pw" placeholder="Mínimo 6 caracteres"></div>
+    <div class="fg"><label>Contraseña</label><div class="pw-wrap"><input type="password" id="ob-pw" placeholder="Mínimo 6 caracteres"><button class="pw-eye" type="button" onclick="togglePw('ob-pw',this)" tabindex="-1"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
     <button class="btn btn-acc btn-full" id="s1-next" style="margin-top:auto;">Continuar →</button>
     <div style="text-align:center;margin-top:14px;font-size:13px;color:var(--t2);">¿Ya tienes cuenta? <button class="btn btn-ghost btn-sm" id="go-login" style="font-size:12px;">Iniciar sesión</button></div>
   </div>
@@ -275,7 +293,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div class="onb-title">Bienvenido/a de vuelta</div>
     <div class="onb-sub">Accede para ver tu progreso y plan del día.</div>
     <div class="fg"><label>Email</label><input type="email" id="lg-email" inputmode="email" placeholder="tu@email.com"></div>
-    <div class="fg"><label>Contraseña</label><input type="password" id="lg-pw" placeholder="Tu contraseña"></div>
+    <div class="fg"><label>Contraseña</label><div class="pw-wrap"><input type="password" id="lg-pw" placeholder="Tu contraseña"><button class="pw-eye" type="button" onclick="togglePw('lg-pw',this)" tabindex="-1"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
     <div id="lg-err" style="color:var(--red);font-size:13px;margin-bottom:10px;display:none;"></div>
     <button class="btn btn-acc btn-full" id="btn-login">Entrar →</button>
     <div style="text-align:center;margin-top:14px;"><button class="btn btn-ghost btn-sm" id="go-register">← Crear cuenta</button></div>
@@ -1513,7 +1531,7 @@ function renderHome(){
       $tw.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><div style="width:12px;height:12px;border-radius:50%;background:'+diaHoy.color+';flex-shrink:0;"></div><div style="font-weight:800;font-size:15px;">'+diaHoy.nombre+'</div></div>'
         +diaHoy.exs.slice(0,4).map(function(e){
           return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;cursor:pointer;" onclick="showGuia(\''+e.n.replace(/'/g,"\\'")+'\',\''+e.id+'\')">'
-            +'<span style="color:var(--acc2);">'+e.n+' 🔍</span><span style="color:var(--t3);">'+e.s+'×'+e.r+'</span></div>';
+            +'<span style="color:var(--acc2);">'+e.n+'</span><span style="color:var(--t3);">'+e.s+'×'+e.r+'</span></div>';
         }).join('')
         +(diaHoy.exs.length>4?'<div style="font-size:11px;color:var(--t3);margin-top:6px;text-align:center;">+'+( diaHoy.exs.length-4)+' ejercicios más en Plan</div>':'')
         +'<button class="btn btn-acc btn-full" style="margin-top:10px;" onclick="goTo(\'sesion\')">⚡ Registrar sesión</button>';
@@ -1584,7 +1602,7 @@ function renderPlanEj(){
           +'<div style="width:10px;height:10px;border-radius:50%;background:'+colorDot+';flex-shrink:0;"></div>'
           +'<div>'
             +'<div class="hevy-card-title">'+d.dia+(isHoy?' <span class="badge bp" style="font-size:10px;margin-left:6px;">HOY</span>':'')+' — '+d.nombre+'</div>'
-            +'<div class="hevy-card-sub">😴 Recuperación activa</div>'
+            +'<div class="hevy-card-sub" style="color:var(--t3);">Recuperación activa</div>'
           +'</div>'
         +'</div>'
         +(d.exs&&d.exs.length?'<div style="margin-top:10px;font-size:13px;color:var(--t2);">'+d.exs.map(function(e){return '· '+e.n;}).join(' &nbsp; ')+'</div>':'')
@@ -1592,7 +1610,7 @@ function renderPlanEj(){
     }
 
     // Ejercicios al estilo Hevy
-    var exsHtml=d.exs.map(function(e){
+    var exsHtml=d.exs.map(function(e,exIdx){
       // Buscar mejor registro en sesiones pasadas
       var bestKg=0, bestReps=0;
       ses.forEach(function(s){
@@ -1611,17 +1629,17 @@ function renderPlanEj(){
       var eid=e.id||'default';
       var ename=e.n.replace(/'/g,"\\'");
       // Icono: emoji según músculo trabajado
-      var musIconos={'Pecho':'🫁','Cuádriceps':'🦵','Glúteo':'🍑','Isquio':'🦵','Dorsal':'🔙','Espalda':'🔙','Bíceps':'💪','Tríceps':'💪','Deltoides':'🏋️','Hombro':'🏋️','Core':'🎯','Gemelo':'🦶','Cardio':'❤️','Recuperación':'😴'};
-      var musKey=Object.keys(musIconos).find(function(k){return e.mus&&e.mus.indexOf(k)>=0;})||'';
-      var iconHtml='<span style="font-size:22px;">'+(musIconos[musKey]||'💪')+'</span>';
-      return '<div class="hevy-ex-item" onclick="showExDetail(\''+eid+'\',\''+ename+'\')">'
-        +'<div class="hevy-ex-icon">'+iconHtml+'</div>'
-        +'<div class="hevy-ex-info">'
-          +'<div class="hevy-ex-name">'+e.n+'</div>'
-          +'<div class="hevy-ex-meta">'+e.s+' series × '+e.r+' · '+e.mus+'</div>'
-          +(hasPrev?'<div style="font-size:11px;color:var(--green);margin-top:2px;">🏆 '+bestKg+'kg × '+bestReps+' reps</div>':'')
+      return '<div class="plan-ex-row2" onclick="showExDetail(\''+eid+'\',\''+ename+'\')">'
+        +'<div class="plan-ex-num">'+(exIdx+1)+'</div>'
+        +'<div class="plan-ex-body">'
+          +'<div class="plan-ex-title">'+e.n+'</div>'
+          +'<div class="plan-ex-detail2">'
+            +'<span class="plan-sets-badge">'+e.s+' × '+e.r+'</span>'
+            +e.mus+(e.rir!==undefined&&e.rir!==''?' · RIR '+e.rir:'')
+          +'</div>'
+          +(hasPrev?'<div class="plan-ex-pr">Mejor: '+bestKg+' kg × '+bestReps+' reps</div>':'')
         +'</div>'
-        +'<div class="hevy-ex-sets">›</div>'
+        +'<div class="plan-ex-arrow">›</div>'
         +'</div>';
     }).join('');
 
@@ -1637,7 +1655,7 @@ function renderPlanEj(){
         +'<span style="font-size:10px;font-weight:600;padding:3px 8px;border-radius:100px;background:var(--bg3);color:var(--t2);">'+tipoLabel+'</span>'
       +'</div>'
       +exsHtml
-      +'<button class="hevy-start-btn" onclick="goTo(\'sesion\')">Empezar Sesión →</button>'
+      +'<button class="hevy-start-btn" onclick="goTo(\'sesion\')">Empezar sesión</button>'
       +'</div>';
   }).join('');
 }
@@ -1833,7 +1851,7 @@ function renderExList(){
     var hdr='<div class="ex-card-hdr">'
       +'<div>'
         +'<div class="ex-card-name" onclick="showGuia(this.dataset.n,this.dataset.id)" data-n="'+ex.n.replace(/"/g,'&quot;')+'" data-id="'+(ex.id||'default')+'">'
-          +ex.n+(ex.extra?'':' 🔍')
+          +ex.n
         +'</div>'
         +'<div class="ex-card-meta">'+ex.mus+(ex.rir!==undefined&&ex.rir!==''?' · RIR '+ex.rir:'')+'</div>'
       +'</div>'
@@ -1912,10 +1930,27 @@ function renderExList(){
           if(inpKg){inpKg.value=s.kg;inpKg.classList.add('filled');}
         }
       }
+      var wasDone=s.done;
       s.done=!s.done;
       renderExList();
-      // Feedback háptico si disponible
+      // Feedback háptico
       if(navigator.vibrate) navigator.vibrate(30);
+      // Auto-arrancar temporizador de descanso al completar una serie
+      if(s.done && !wasDone){
+        clearInterval(APP.timerInt);
+        APP.timerRun=false;
+        APP.timerSecs=APP.timerMax;
+        renderTimerDisplay();
+        // Arrancar automáticamente con pequeño delay visual
+        setTimeout(function(){
+          if(!APP.timerRun){
+            toggleTimer();
+            // Scroll suave al timer
+            var td=$('timer-disp');
+            if(td) td.scrollIntoView({behavior:'smooth',block:'center'});
+          }
+        }, 250);
+      }
     });
   });
 
@@ -2428,12 +2463,32 @@ function toggleTimer(){
     APP.timerRun=true;$('timer-tog').textContent='⏸ Pausar';
     APP.timerInt=setInterval(function(){
       APP.timerSecs--;renderTimerDisplay();
-      if(APP.timerSecs<=0){clearInterval(APP.timerInt);APP.timerRun=false;APP.timerSecs=APP.timerMax;renderTimerDisplay();$('timer-tog').textContent='▶ Iniciar';toast('⏰ ¡A por la siguiente serie!','var(--amber)');}
+      if(APP.timerSecs<=0){
+            clearInterval(APP.timerInt);APP.timerRun=false;APP.timerSecs=APP.timerMax;
+            renderTimerDisplay();
+            $('timer-tog').textContent='Iniciar';
+            // Vibración larga para avisar (patrón: 200ms ON, 100ms OFF, 200ms ON)
+            if(navigator.vibrate) navigator.vibrate([200,100,200]);
+            // Toast grande y visible
+            toast('Descanso completado — siguiente serie', 'var(--acc2)');
+          }
     },1000);
   }
 }
 function resetTimer(){clearInterval(APP.timerInt);APP.timerRun=false;APP.timerSecs=APP.timerMax;$('timer-tog').textContent='▶ Iniciar';renderTimerDisplay();}
 window.setTimer=function(s){clearInterval(APP.timerInt);APP.timerRun=false;APP.timerSecs=s;APP.timerMax=s;$('timer-tog').textContent='▶ Iniciar';renderTimerDisplay();};
+
+// ── Toggle contraseña visible ─────────────────────────
+function togglePw(inputId,btn){
+  var inp=$(inputId);
+  if(!inp) return;
+  var show=inp.type==='password';
+  inp.type=show?'text':'password';
+  // SVG ojo abierto / cerrado
+  btn.innerHTML=show
+    ?'<svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+    :'<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+}
 
 // ── BOOT ──────────────────────────────────────
 (function boot(){
